@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -28,6 +29,7 @@ public class OutcomeIncomeData {
 //		System.out.println(outcomeIncomesList);
 //		outcomeIncomesList.sorted();
 //		System.out.println(outcomeIncomesList);
+		Collections.sort(outcomeIncomesList);
 		return outcomeIncomesList;
 	}
 
@@ -80,6 +82,14 @@ public class OutcomeIncomeData {
 
 					outcomeIncomesList.add(new OutcomeIncome(date, incomeFlag, totalValue, source, notes));
 				}
+				
+				//remove if sortedList in controller working properly
+//			outcomeIncomesList.sort(new Comparator<OutcomeIncome>() {
+//				@Override
+//				public int compare(OutcomeIncome o1, OutcomeIncome o2) {
+//					return o1.getDate().compareTo(o2.getDate());
+//				}
+//			});
 			} catch (Exception e) {
 				e.getMessage();
 			}

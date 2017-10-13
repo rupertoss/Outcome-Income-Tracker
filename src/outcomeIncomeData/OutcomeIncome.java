@@ -2,7 +2,7 @@ package outcomeIncomeData;
 
 import java.time.LocalDate;
 
-public class OutcomeIncome {
+public class OutcomeIncome implements Comparable<OutcomeIncome> {
 	private LocalDate date;
 	boolean incomeFlag;
 	private double totalValue;
@@ -63,6 +63,12 @@ public class OutcomeIncome {
 	public String toString() {
 		return "OutcomeIncome [date=" + date + ", incomeFlag=" + incomeFlag + ", totalValue=" + totalValue + ", source="
 				+ source + ", notes=" + notes + "]";
+	}
+	
+	@Override
+	public int compareTo(OutcomeIncome outcomeIncome) {
+		return this.getDate().compareTo(outcomeIncome.getDate());
+		
 	}
 
 

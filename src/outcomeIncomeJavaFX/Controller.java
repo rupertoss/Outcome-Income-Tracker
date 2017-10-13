@@ -1,8 +1,12 @@
 package outcomeIncomeJavaFX;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Optional;
+
 import javafx.application.Platform;
+import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -34,6 +38,8 @@ public class Controller {
 
 	@FXML
 	private ContextMenu contextMenu;
+	
+
 
 	public void initialize() {
 		data = new OutcomeIncomeData();
@@ -111,6 +117,7 @@ public class Controller {
 				OutcomeIncome newOutcomeIncome = outcomeIncomeController.getNewOutcomeIncome();
 				System.out.println(newOutcomeIncome);
 				data.addOutcomeIncome(newOutcomeIncome);
+				outcomeIncomesTable.setItems(data.getOutcomeIncomes());
 				data.saveOutcomeIncomes();
 			}
 		} catch (Exception e) {
@@ -162,7 +169,6 @@ public class Controller {
 				
 				//data binding isn't working properly, used another way to deal with and working now correctly
 				data.saveOutcomeIncomes();
-				data.loadOutcomeIncomes();
 				outcomeIncomesTable.setItems(data.getOutcomeIncomes());
 			}
 		} catch (Exception e) {
@@ -207,6 +213,7 @@ public class Controller {
 		if (result.isPresent() && result.get() == ButtonType.OK) {
 			data.deleteOutcomeIncome(selectedOutcomeIncome);
 			data.saveOutcomeIncomes();
+			outcomeIncomesTable.setItems(data.getOutcomeIncomes());
 		}
 	}
 
