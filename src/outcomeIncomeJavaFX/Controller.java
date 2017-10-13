@@ -40,6 +40,8 @@ public class Controller {
 		data.loadOutcomeIncomes();
 		outcomeIncomesTable.setItems(data.getOutcomeIncomes());
 
+		
+		//ContextMenu for TableView entries "edit/delete"
 		contextMenu = new ContextMenu();
 
 		MenuItem deleteMenuItem = new MenuItem("Delete");
@@ -83,6 +85,7 @@ public class Controller {
 		});
 	}
 
+	//Showing dialog to add new Outcome/Income
 	@FXML
 	public void showOutcomeIncomeDialog() {
 		Dialog<ButtonType> dialog = new Dialog<ButtonType>();
@@ -116,10 +119,12 @@ public class Controller {
 			return;
 		}
 	}
-
+	
+	//Showing dialog to edit existing Outcome/Income
 	@FXML
 	public void showEditOutcomeIncomeDialog() {
 		OutcomeIncome selectedOutcomeIncome = outcomeIncomesTable.getSelectionModel().getSelectedItem();
+		//Alert if no entry selected
 		if (selectedOutcomeIncome == null) {
 			Alert alert = new Alert(Alert.AlertType.INFORMATION);
 			alert.setTitle("No Outcome/Income selected");
@@ -127,6 +132,7 @@ public class Controller {
 			alert.showAndWait();
 			return;
 		}
+		
 		Dialog<ButtonType> dialog = new Dialog<>();
 		dialog.initOwner(mainPanel.getScene().getWindow());
 		dialog.setTitle("Edit Outcome/Income");
@@ -177,10 +183,12 @@ public class Controller {
 		alert.setContentText("Please fill correctly all the fields\n\nTotal Value field is required - decimal pointer is comma (.)\nSource field is required\nNotes field is not required");
 		alert.showAndWait();
 	}
-
+	
+	//Deleting an OutcomeIncome
 	@FXML
 	public void deleteOutcomeIncome() {
 		OutcomeIncome selectedOutcomeIncome = outcomeIncomesTable.getSelectionModel().getSelectedItem();
+		//Alert if no entry selected
 		if (selectedOutcomeIncome == null) {
 			Alert alert = new Alert(Alert.AlertType.INFORMATION);
 			alert.setTitle("No Outcome/Income selected");
@@ -188,7 +196,8 @@ public class Controller {
 			alert.showAndWait();
 			return;
 		}
-
+		
+		//Alert to confirm deleting
 		Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
 		alert.setTitle("Delete Outcome/Income");
 		alert.setHeaderText("Are you sure you want to delete selected Outcome/Income");
@@ -201,6 +210,7 @@ public class Controller {
 		}
 	}
 
+	//Deleting be pressing "DELETE"
 	@FXML
 	public void handleKeyPressed(KeyEvent key) {
 		if (key.getCode().equals(KeyCode.DELETE))

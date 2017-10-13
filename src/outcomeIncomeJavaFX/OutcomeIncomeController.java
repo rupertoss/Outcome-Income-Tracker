@@ -33,7 +33,7 @@ public class OutcomeIncomeController {
 	@FXML
 	private TextArea notesArea;
 	
-
+	//creating new OutcomeIncome from dialog
 	public OutcomeIncome getNewOutcomeIncome() {
 		double totalValue = Double.parseDouble(totalValueField.getText());
 		String source = sourceField.getText();
@@ -45,6 +45,7 @@ public class OutcomeIncomeController {
 		return newOutcomeIncome;
 	}
 	
+	//setting dialog fields by selected OutcomeIncome properties
 	public void editOutcomeIncome(OutcomeIncome outcomeIncome) {
 		datepicker.setValue(outcomeIncome.getDate());
 		if(outcomeIncome.isIncomeFlag())
@@ -54,6 +55,7 @@ public class OutcomeIncomeController {
 		notesArea.setText(outcomeIncome.getNotes());
 	}
 
+	//updating OutcomeIncome properties by values from editDialog 
 	public void updateOutcomeIncome(OutcomeIncome selectedOutcomeIncome) {
 		selectedOutcomeIncome.setDate(datepicker.getValue());
 		selectedOutcomeIncome.setTotalValue(Double.parseDouble(totalValueField.getText()));

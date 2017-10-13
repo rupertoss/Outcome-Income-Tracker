@@ -38,7 +38,8 @@ public class OutcomeIncomeData {
 	public void deleteOutcomeIncome(OutcomeIncome outcomeIncome) {
 		outcomeIncomesList.remove(outcomeIncome);
 	}
-
+	
+	//saving data to a textFile 
 	public void saveOutcomeIncomes() {
 		try (BufferedWriter bw = new BufferedWriter(new FileWriter(filename))) {
 			for (int i=0; i<outcomeIncomesList.size(); i++) {
@@ -61,6 +62,7 @@ public class OutcomeIncomeData {
 		}
 	}
 
+	//loading data from a textFile
 	public void loadOutcomeIncomes() {
 		outcomeIncomesList = FXCollections.observableArrayList();
 
