@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+<?import javafx.scene.control.MenuItem?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml" 
+			fx:controller="outcomeIncomeJavaFX.Controller"
+			fx:id="mainPanel">
+	<top>
+		<VBox>
+			<MenuBar>
+				<Menu text="File">
+					<items>
+						<MenuItem text="Add..." onAction="#showOutcomeIncomeDialog"/>
+						<MenuItem text="Edit..." onAction="#showEditOutcomeIncomeDialog"/>
+						<MenuItem text="Delete..." onAction="#deleteOutcomeIncome"/>
+						<MenuItem text="Save"/>
+						<SeparatorMenuItem/>
+						<MenuItem text="Exit" onAction="#handleExit"/>
+					</items>
+				</Menu>
+				<Menu text="Edit">
+					<items>
+						<MenuItem text="Edit entry"/>
+						<MenuItem text="Sort..."/>
+					</items>
+				</Menu>
+			</MenuBar>
+			<ToolBar>
+				<HBox spacing="10">
+					<ToggleButton text="7days">
+						<tooltip>
+							<Tooltip text="Show this week shoppings"/>
+						</tooltip>
+					</ToggleButton>
+					<Separator orientation="vertical"/>
+					<ToggleButton text="30days">
+						<tooltip>
+							<Tooltip text="Show this month shoppings"/>
+						</tooltip>
+					</ToggleButton>
+				</HBox>
+			</ToolBar>
+         </VBox>
+    </top>
+    <left>
+    	<ListView>
+    	</ListView>
+    </left>
+    <center>
+    	<TableView fx:id="outcomeIncomesTable" onKeyPressed="#handleKeyPressed">
+    		<columns>
+    			<TableColumn text="Date">
+    				<cellValueFactory>
+    					<PropertyValueFactory property="date"/>
+    				</cellValueFactory>
+    			</TableColumn>		
+    			<TableColumn text="Total Value">
+    				<cellValueFactory>
+    					<PropertyValueFactory property="totalValue"/>
+    				</cellValueFactory>
+    			</TableColumn>		
+    			<TableColumn text="Source">
+    				<cellValueFactory>
+    					<PropertyValueFactory property="source"/>
+    				</cellValueFactory>
+    			</TableColumn>	
+    			<TableColumn text="Notes">
+    				<cellValueFactory>
+    					<PropertyValueFactory property="notes"/>
+    				</cellValueFactory>
+    			</TableColumn>	
+    		</columns>
+    	</TableView>
+    </center>
+
+
+</BorderPane>
+

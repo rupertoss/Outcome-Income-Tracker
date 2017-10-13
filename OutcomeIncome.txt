@@ -1,0 +1,7 @@
+2017-09-17//false//4.55//Biedronka//Mleko, Chleb, Chipsy
+2017-09-20//false//8.21//Biedronka//Chleb, Ry¿, Pomidory, Banany
+2017-09-21//true//18.8//Vinoteka//Napiwki
+2017-10-10//true//490.12//Vinoteka//Wyp³ata za wrzesieñ (46h)
+2017-09-13//false//24.55//Carrefour//Czekolada, Mas³o, Mleko, Chleb, Makaron, Szpinak
+2017-09-28//true//44.0//Akcja Shell//Ankiety
+2017-09-26//false//3.29//Carrefour//Chipsy

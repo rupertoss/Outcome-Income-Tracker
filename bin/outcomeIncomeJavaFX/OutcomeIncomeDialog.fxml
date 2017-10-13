@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.DialogPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.control.RadioButton?>
+
+
+
+<DialogPane xmlns:fx="http://javafx.com/fxml/1"
+			fx:controller="outcomeIncomeJavaFX.OutcomeIncomeController">
+	<headerText>
+		Fill in the information about your new Outcome/Income
+	</headerText>
+	<content>
+		<GridPane vgap="10" hgap="10">
+			<fx:define>
+				<ToggleGroup fx:id="outcomeIncomeGroup" />
+			</fx:define>
+			<RadioButton fx:id="outcomeButton" GridPane.rowIndex="0" GridPane.columnIndex="0"
+				text="Outcome" selected="true" ToggleGroup="$outcomeIncomeGroup" />
+			<RadioButton fx:id="incomeButton" GridPane.rowIndex="0" GridPane.columnIndex="1"
+				text="Income" ToggleGroup="$outcomeIncomeGroup"/>
+			<Label text="Date:" GridPane.rowIndex="1" GridPane.columnIndex="0" />
+			<DatePicker fx:id="datepicker" GridPane.rowIndex="1" GridPane.columnIndex="1" />
+			<Label text="Total Value" GridPane.rowIndex="2"
+				GridPane.columnIndex="0" />
+			<TextField fx:id="totalValueField" GridPane.rowIndex="2" GridPane.columnIndex="1" />
+			<Label text="Source" GridPane.rowIndex="3"
+				GridPane.columnIndex="0" />
+			<TextField fx:id="sourceField" GridPane.rowIndex="3" GridPane.columnIndex="1" />
+			<Label text="Notes:" GridPane.rowIndex="4"
+				GridPane.columnIndex="0" GridPane.columnSpan="2" />
+			<TextArea fx:id="notesArea" GridPane.rowIndex="5" GridPane.columnIndex="0"
+				GridPane.columnSpan="2" />
+		</GridPane>
+	</content>
+</DialogPane>
+
