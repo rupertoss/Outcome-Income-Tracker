@@ -14,6 +14,7 @@ versions
 		redesigned ToolBaradded Buttons for adding, editing and deleting
 		added arrow to the sorting column at the start of application
 		redesigned MenuBar
+1.05	improved filtering (resign of using FilteredList) - now it support sorting after filtering
 		
 	
 

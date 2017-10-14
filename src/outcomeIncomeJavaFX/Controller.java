@@ -3,9 +3,9 @@ package outcomeIncomeJavaFX;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Optional;
-import java.util.function.Predicate;
 import javafx.application.Platform;
-import javafx.collections.transformation.FilteredList;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -39,30 +39,27 @@ public class Controller {
 
 	@FXML
 	private ContextMenu contextMenu;
-	
+
 	@FXML
 	private TableColumn<OutcomeIncome, ?> tableColumnDate;
-	
+
 	@FXML
 	private ToggleButton last30daysButton;
-	
-	private FilteredList<OutcomeIncome> filteredList;
 
-	
 	public void initialize() {
 		data = new OutcomeIncomeData();
 		data.loadOutcomeIncomes();
 		outcomeIncomesTable.setItems(data.getOutcomeIncomes());
 		tableColumnDate.setSortType(TableColumn.SortType.ASCENDING);
 		outcomeIncomesTable.getSortOrder().add(tableColumnDate);
-		
-		//ContextMenu for TableView entries "edit/delete"
+
+		// ContextMenu for TableView entries "edit/delete"
 		contextMenu = new ContextMenu();
 
 		MenuItem deleteMenuItem = new MenuItem("Delete");
 		deleteMenuItem.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
-			public void handle(ActionEvent event) {	
+			public void handle(ActionEvent event) {
 				deleteOutcomeIncome();
 			}
 		});
@@ -98,7 +95,7 @@ public class Controller {
 		});
 	}
 
-	//Showing dialog to add new Outcome/Income
+	// Showing dialog to add new Outcome/Income
 	@FXML
 	public void showOutcomeIncomeDialog() {
 		Dialog<ButtonType> dialog = new Dialog<ButtonType>();
@@ -134,12 +131,12 @@ public class Controller {
 			return;
 		}
 	}
-	
-	//Showing dialog to edit existing Outcome/Income
+
+	// Showing dialog to edit existing Outcome/Income
 	@FXML
 	public void showEditOutcomeIncomeDialog() {
 		OutcomeIncome selectedOutcomeIncome = outcomeIncomesTable.getSelectionModel().getSelectedItem();
-		//Alert if no entry selected
+		// Alert if no entry selected
 		if (selectedOutcomeIncome == null) {
 			Alert alert = new Alert(Alert.AlertType.INFORMATION);
 			alert.setTitle("No Outcome/Income selected");
@@ -147,7 +144,7 @@ public class Controller {
 			alert.showAndWait();
 			return;
 		}
-		
+
 		Dialog<ButtonType> dialog = new Dialog<>();
 		dialog.initOwner(mainPanel.getScene().getWindow());
 		dialog.setTitle("Edit Outcome/Income");
@@ -174,8 +171,9 @@ public class Controller {
 			Optional<ButtonType> result = dialog.showAndWait();
 			if (result.isPresent() && result.get() == ButtonType.OK) {
 				outcomeIncomeController.updateOutcomeIncome(selectedOutcomeIncome);
-				
-				//data binding isn't working properly, used another way to deal with and working now correctly
+
+				// data binding isn't working properly, used another way to deal with and
+				// working now correctly
 				data.saveOutcomeIncomes();
 				data.loadOutcomeIncomes();
 				outcomeIncomesTable.setItems(data.getOutcomeIncomes());
@@ -196,15 +194,16 @@ public class Controller {
 	private void showErrorAlert() {
 		Alert alert = new Alert(Alert.AlertType.ERROR);
 		alert.setTitle("Wrong Input Data");
-		alert.setContentText("Please fill correctly all the fields\n\nTotal Value field is required - decimal pointer is comma (.)\nSource field is required\nNotes field is not required");
+		alert.setContentText(
+				"Please fill correctly all the fields\n\nTotal Value field is required - decimal pointer is comma (.)\nSource field is required\nNotes field is not required");
 		alert.showAndWait();
 	}
-	
-	//Deleting an OutcomeIncome
+
+	// Deleting an OutcomeIncome
 	@FXML
 	public void deleteOutcomeIncome() {
 		OutcomeIncome selectedOutcomeIncome = outcomeIncomesTable.getSelectionModel().getSelectedItem();
-		//Alert if no entry selected
+		// Alert if no entry selected
 		if (selectedOutcomeIncome == null) {
 			Alert alert = new Alert(Alert.AlertType.INFORMATION);
 			alert.setTitle("No Outcome/Income selected");
@@ -212,12 +211,13 @@ public class Controller {
 			alert.showAndWait();
 			return;
 		}
-		
-		//Alert to confirm deleting
+
+		// Alert to confirm deleting
 		Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
 		alert.setTitle("Delete Outcome/Income");
 		alert.setHeaderText("Are you sure you want to delete selected Outcome/Income");
-		alert.setContentText("You are trying to delete this entry: \n" + selectedOutcomeIncome.toString() + "\nPress OK to confirm, or cancel to back out");
+		alert.setContentText("You are trying to delete this entry: \n" + selectedOutcomeIncome.toString()
+				+ "\nPress OK to confirm, or cancel to back out");
 		Optional<ButtonType> result = alert.showAndWait();
 
 		if (result.isPresent() && result.get() == ButtonType.OK) {
@@ -227,33 +227,30 @@ public class Controller {
 		}
 	}
 
-	//Deleting be pressing "DELETE"
+	// Deleting be pressing "DELETE"
 	@FXML
 	public void handleKeyPressed(KeyEvent key) {
 		if (key.getCode().equals(KeyCode.DELETE))
 			deleteOutcomeIncome();
 
 	}
-	
-	//Button handler of last 30days entries
+
+	// Button handler of last 30days entries
 	@FXML
 	public void handleLast30daysButton() {
-		if(last30daysButton.isSelected()) {
-			filteredList = new FilteredList<>(data.getOutcomeIncomes(), new Predicate<OutcomeIncome> () {
-				@Override
-				public boolean test(OutcomeIncome t) {
-					if (t.getDate().isAfter(LocalDate.now().minusDays(30)))
-						return true;
-					return false;
+		if (last30daysButton.isSelected()) {
+			ObservableList<OutcomeIncome> filteredList = FXCollections.observableArrayList(data.getOutcomeIncomes());
+			for (int i = 0; i < filteredList.size(); i++) {
+				if (!filteredList.get(i).getDate().isAfter(LocalDate.now().minusDays(30))) {
+					filteredList.remove(i);
 				}
-			});
+			}
 			outcomeIncomesTable.setItems(filteredList);
 		} else {
 			outcomeIncomesTable.setItems(data.getOutcomeIncomes());
 		}
-
 	}
-	
+
 	@FXML
 	public void saveData() {
 		data.saveOutcomeIncomes();
