@@ -1,13 +1,13 @@
+2017-09-01//false//15.0//Heyeah//Do³adowanie
+2017-09-07//true//44.0//Akcja Shell//Ankiety
+2017-09-08//true//200.0//Mama//Kasa od mamy
 2017-09-11//false//750.0//Uczelnia//Czesne
-2017-09-13//false//24.55//Carrefour//Czekolada, Mas³o, Mleko, Chleb, Makaron, Szpinak
-2017-09-14//false//15.0//Heyeah//Do³adowanie
+2017-09-13//true//18.87//Vinoteka//Napiwki
 2017-09-15//true//460.44//Vinoteka//Wyp³ata za sierpieñ
 2017-09-17//false//4.55//Biedronka//Mleko, Chleb, Chipsy
-2017-09-18//true//18.87//Vinoteka//Napiwki
-2017-09-20//false//8.21//Biedronka//Chleb, Ry¿, Pomidory, Banany
-2017-09-22//false//2.2//MPK//Bilet 20min
-2017-09-23//true//44.0//Akcja Shell//Ankiety
-2017-09-27//true//200.0//Mama//Kasa od mamy
-2017-10-03//false//4.4//MPK//2x bilet 20min
-2017-10-06//false//3.29//Carrefour//Chipsy
+2017-09-23//false//3.29//Carrefour//Chipsy
+2017-09-24//false//2.2//MPK//Bilet 20min
+2017-09-28//false//8.21//Biedronka//Chleb, Ry¿, Pomidory, Banany
+2017-09-30//false//24.55//Carrefour//Czekolada, Mas³o, Mleko, Chleb, Makaron, Szpinak
+2017-10-03//false//4.6//MPK//2x bilet 20min
 2017-10-12//false//16.88//Biedronka//Chleb, Mleko, P³atki, Ry¿, Makaron, Czekolada

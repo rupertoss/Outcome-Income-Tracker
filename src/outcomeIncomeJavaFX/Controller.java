@@ -1,12 +1,11 @@
 package outcomeIncomeJavaFX;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.Comparator;
+import java.time.LocalDate;
 import java.util.Optional;
-
+import java.util.function.Predicate;
 import javafx.application.Platform;
-import javafx.collections.transformation.SortedList;
+import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -16,7 +15,9 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
@@ -39,13 +40,21 @@ public class Controller {
 	@FXML
 	private ContextMenu contextMenu;
 	
+	@FXML
+	private TableColumn<OutcomeIncome, ?> tableColumnDate;
+	
+	@FXML
+	private ToggleButton last30daysButton;
+	
+	private FilteredList<OutcomeIncome> filteredList;
 
-
+	
 	public void initialize() {
 		data = new OutcomeIncomeData();
 		data.loadOutcomeIncomes();
 		outcomeIncomesTable.setItems(data.getOutcomeIncomes());
-
+		tableColumnDate.setSortType(TableColumn.SortType.ASCENDING);
+		outcomeIncomesTable.getSortOrder().add(tableColumnDate);
 		
 		//ContextMenu for TableView entries "edit/delete"
 		contextMenu = new ContextMenu();
@@ -53,7 +62,7 @@ public class Controller {
 		MenuItem deleteMenuItem = new MenuItem("Delete");
 		deleteMenuItem.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
-			public void handle(ActionEvent event) {
+			public void handle(ActionEvent event) {	
 				deleteOutcomeIncome();
 			}
 		});
@@ -64,7 +73,6 @@ public class Controller {
 			public void handle(ActionEvent event) {
 				showEditOutcomeIncomeDialog();
 			}
-
 		});
 
 		// show context menu over whole TableView including empty rows :/
@@ -87,7 +95,6 @@ public class Controller {
 					contextMenu.show(outcomeIncomesTable, event.getScreenX(), event.getScreenY());
 				}
 			}
-
 		});
 	}
 
@@ -118,6 +125,7 @@ public class Controller {
 				System.out.println(newOutcomeIncome);
 				data.addOutcomeIncome(newOutcomeIncome);
 				outcomeIncomesTable.setItems(data.getOutcomeIncomes());
+				outcomeIncomesTable.getSortOrder().add(tableColumnDate);
 				data.saveOutcomeIncomes();
 			}
 		} catch (Exception e) {
@@ -169,7 +177,9 @@ public class Controller {
 				
 				//data binding isn't working properly, used another way to deal with and working now correctly
 				data.saveOutcomeIncomes();
+				data.loadOutcomeIncomes();
 				outcomeIncomesTable.setItems(data.getOutcomeIncomes());
+				outcomeIncomesTable.getSortOrder().add(tableColumnDate);
 			}
 		} catch (Exception e) {
 			showErrorAlert();
@@ -223,5 +233,29 @@ public class Controller {
 		if (key.getCode().equals(KeyCode.DELETE))
 			deleteOutcomeIncome();
 
+	}
+	
+	//Button handler of last 30days entries
+	@FXML
+	public void handleLast30daysButton() {
+		if(last30daysButton.isSelected()) {
+			filteredList = new FilteredList<>(data.getOutcomeIncomes(), new Predicate<OutcomeIncome> () {
+				@Override
+				public boolean test(OutcomeIncome t) {
+					if (t.getDate().isAfter(LocalDate.now().minusDays(30)))
+						return true;
+					return false;
+				}
+			});
+			outcomeIncomesTable.setItems(filteredList);
+		} else {
+			outcomeIncomesTable.setItems(data.getOutcomeIncomes());
+		}
+
+	}
+	
+	@FXML
+	public void saveData() {
+		data.saveOutcomeIncomes();
 	}
 }
