@@ -5,6 +5,9 @@
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.cell.PropertyValueFactory?>
 <?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.text.Font?>
 
 <BorderPane xmlns:fx="http://javafx.com/fxml" 
 			fx:controller="outcomeIncomeJavaFX.Controller"
@@ -55,8 +58,77 @@
          </VBox>
     </top>
     <left>
-    	<ListView>
-    	</ListView>
+		<VBox minWidth="200" alignment="TOP_CENTER">
+			<Label fx:id="statisticsLabel" textAlignment="LEFT" alignment="BASELINE_RIGHT">
+				<font>
+					<Font name="Calibri bold" size="16"/>
+				</font>
+ 			</Label>
+ 			<HBox alignment="TOP_LEFT" >
+ 				<Label text="Money balance: ">
+ 					<Font name="Calibri" size="16"/>
+ 				</Label>
+ 				 <Label fx:id="totalMoneyLabel">
+ 					<Font name="Calibri" size="16"/>
+ 				</Label>
+ 			</HBox>
+ 			<HBox alignment="TOP_LEFT">
+ 				<Label text="Outcome balance: ">
+ 					<Font name="Calibri" size="16"/>
+ 				</Label>
+ 				 <Label fx:id="totalOutcomeLabel">
+ 					<Font name="Calibri" size="16"/>
+ 				</Label>
+ 			</HBox>
+  			<HBox alignment="TOP_LEFT">
+ 				<Label text="Income balance: ">
+ 					<Font name="Calibri" size="16"/>
+ 				</Label>
+ 				 <Label fx:id="totalIncomeLabel">
+ 					<Font name="Calibri" size="16"/>
+ 				</Label>
+ 			</HBox>
+   			<HBox alignment="TOP_LEFT">
+ 				<Label text="Number of Entries: ">
+ 					<Font name="Calibri" size="16"/>
+ 				</Label>
+ 				 <Label fx:id="nrOfEntriesLabel">
+ 					<Font name="Calibri" size="16"/>
+ 				</Label>
+ 			</HBox>
+    		<HBox alignment="TOP_LEFT">
+ 				<Label text="Number of Outcomes: ">
+ 					<Font name="Calibri" size="16"/>
+ 				</Label>
+ 				 <Label fx:id="nrOfOutcomesLabel">
+ 					<Font name="Calibri" size="16"/>
+ 				</Label>
+ 			</HBox>
+    		<HBox alignment="TOP_LEFT">
+ 				<Label text="Number of Incomes: ">
+ 					<Font name="Calibri" size="16"/>
+ 				</Label>
+ 				 <Label fx:id="nrOfIncomesLabel">
+ 					<Font name="Calibri" size="16"/>
+ 				</Label>
+  			</HBox>
+    		<HBox alignment="TOP_LEFT">
+ 				<Label text="Average Outcome amount: ">
+ 					<Font name="Calibri" size="16"/>
+ 				</Label>
+ 				 <Label fx:id="averageOutcomeLabel">
+ 					<Font name="Calibri" size="16"/>
+ 				</Label>
+ 			</HBox>
+    		<HBox alignment="TOP_LEFT">
+ 				<Label text="Average Income amount: ">
+ 					<Font name="Calibri" size="16"/>
+ 				</Label>
+ 				 <Label fx:id="averageIncomeLabel">
+ 					<Font name="Calibri" size="16"/>
+ 				</Label>
+ 			</HBox>
+		</VBox>
     </left>
     <center>
     	<TableView fx:id="outcomeIncomesTable" onKeyPressed="#handleKeyPressed">

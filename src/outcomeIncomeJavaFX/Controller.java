@@ -3,6 +3,7 @@ package outcomeIncomeJavaFX;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Optional;
+
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -14,6 +15,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -46,12 +48,43 @@ public class Controller {
 	@FXML
 	private ToggleButton last30daysButton;
 
+	@FXML
+	private Label statisticsLabel;
+	
+	@FXML
+	private Label totalMoneyLabel;
+	
+	@FXML
+	private Label totalOutcomeLabel;
+	
+	@FXML
+	private Label totalIncomeLabel;
+	
+	@FXML
+	private Label nrOfEntriesLabel;
+	
+	@FXML
+	private Label nrOfOutcomesLabel;
+	
+	@FXML
+	private Label nrOfIncomesLabel;
+	
+	@FXML
+	private Label averageOutcomeLabel;
+	
+	@FXML
+	private Label averageIncomeLabel;
+	
+	
+	
 	public void initialize() {
 		data = new OutcomeIncomeData();
 		data.loadOutcomeIncomes();
 		outcomeIncomesTable.setItems(data.getOutcomeIncomes());
 		tableColumnDate.setSortType(TableColumn.SortType.ASCENDING);
 		outcomeIncomesTable.getSortOrder().add(tableColumnDate);
+		
+		displayStatistics();
 
 		// ContextMenu for TableView entries "edit/delete"
 		contextMenu = new ContextMenu();
@@ -121,9 +154,10 @@ public class Controller {
 				OutcomeIncome newOutcomeIncome = outcomeIncomeController.getNewOutcomeIncome();
 				System.out.println(newOutcomeIncome);
 				data.addOutcomeIncome(newOutcomeIncome);
-				outcomeIncomesTable.setItems(data.getOutcomeIncomes());
+				handleLast30daysButton();
 				outcomeIncomesTable.getSortOrder().add(tableColumnDate);
 				data.saveOutcomeIncomes();
+				displayStatistics();
 			}
 		} catch (Exception e) {
 			showErrorAlert();
@@ -176,8 +210,9 @@ public class Controller {
 				// working now correctly
 				data.saveOutcomeIncomes();
 				data.loadOutcomeIncomes();
-				outcomeIncomesTable.setItems(data.getOutcomeIncomes());
+				handleLast30daysButton();
 				outcomeIncomesTable.getSortOrder().add(tableColumnDate);
+				displayStatistics();
 			}
 		} catch (Exception e) {
 			showErrorAlert();
@@ -223,7 +258,8 @@ public class Controller {
 		if (result.isPresent() && result.get() == ButtonType.OK) {
 			data.deleteOutcomeIncome(selectedOutcomeIncome);
 			data.saveOutcomeIncomes();
-			outcomeIncomesTable.setItems(data.getOutcomeIncomes());
+			handleLast30daysButton();
+			displayStatistics();
 		}
 	}
 
@@ -239,20 +275,65 @@ public class Controller {
 	@FXML
 	public void handleLast30daysButton() {
 		if (last30daysButton.isSelected()) {
-			ObservableList<OutcomeIncome> filteredList = FXCollections.observableArrayList(data.getOutcomeIncomes());
-			for (int i = 0; i < filteredList.size(); i++) {
-				if (!filteredList.get(i).getDate().isAfter(LocalDate.now().minusDays(30))) {
-					filteredList.remove(i);
+			ObservableList<OutcomeIncome> filteredList = FXCollections.observableArrayList();
+			System.out.println(data.getOutcomeIncomes().size());
+			for (int i = 0; i < data.getOutcomeIncomes().size(); i++) {
+				if (data.getOutcomeIncomes().get(i).getDate().isAfter(LocalDate.now().minusDays(30))) {
+					filteredList.add(data.getOutcomeIncomes().get(i));
+
 				}
 			}
 			outcomeIncomesTable.setItems(filteredList);
+
 		} else {
 			outcomeIncomesTable.setItems(data.getOutcomeIncomes());
 		}
+		displayStatistics();
+		outcomeIncomesTable.getSortOrder().add(tableColumnDate);
 	}
 
 	@FXML
 	public void saveData() {
 		data.saveOutcomeIncomes();
 	}
+	
+	public void displayStatistics() {
+		double totalMoney = 0;
+		double outcomeMoney = 0;
+		double incomeMoney = 0;
+		int nrOfEntries = outcomeIncomesTable.getItems().size();
+		int nrOfOutcomes = 0;
+		int nrOfIncomes = 0;
+		double averageOutcome = 0;
+		double averageIncome = 0;
+		
+		for (int i=0; i<outcomeIncomesTable.getItems().size(); i++) {
+			//calculating totalValue of entries
+			totalMoney += outcomeIncomesTable.getItems().get(i).getTotalValue();
+			//calculating in division of outcome or income
+			if(outcomeIncomesTable.getItems().get(i).getTotalValue() < 0) {
+				outcomeMoney += outcomeIncomesTable.getItems().get(i).getTotalValue();
+				nrOfOutcomes++;
+			}
+			else {
+				incomeMoney += outcomeIncomesTable.getItems().get(i).getTotalValue();
+				nrOfIncomes++;
+			}
+		}
+		
+		//setting average to 0 if nrOfOutcomes/Incomes = 0
+		averageOutcome = nrOfOutcomes != 0 ? outcomeMoney / nrOfOutcomes : 0;
+		averageIncome = nrOfIncomes != 0 ? incomeMoney / nrOfIncomes : 0;
+
+			statisticsLabel.setText("Statistics");
+			totalMoneyLabel.setText(String.format("%.2f", totalMoney));
+			totalOutcomeLabel.setText(String.format("%.2f", outcomeMoney));
+			totalIncomeLabel.setText(String.format("%.2f", incomeMoney));
+			nrOfEntriesLabel.setText("" + nrOfEntries);
+			nrOfOutcomesLabel.setText("" + nrOfOutcomes);
+			nrOfIncomesLabel.setText("" + nrOfIncomes);
+			averageOutcomeLabel.setText(String.format("%.2f", averageOutcome));
+			averageIncomeLabel.setText(String.format("%.2f", averageIncome));
+	}
+	
 }

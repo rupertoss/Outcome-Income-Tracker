@@ -15,13 +15,15 @@ versions
 		added arrow to the sorting column at the start of application
 		redesigned MenuBar
 1.05	improved filtering (resign of using FilteredList) - now it support sorting after filtering
+1.06	further improvement to filtering (now it should work as intended - modifying data, when filtering is active, is now supported)
+		added statistics
 		
 	
 
 Still to implement:
-- statistics
+- statistics (implemented)
 - cell colors
-- filtering (implemented by not working as intended)
+- filtering (implemented)
 - proper ToolBar (implemented)
 - singleton
 - exception handling
