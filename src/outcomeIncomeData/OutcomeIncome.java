@@ -1,13 +1,15 @@
 package outcomeIncomeData;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 
-public class OutcomeIncome implements Comparable<OutcomeIncome> {
+public class OutcomeIncome implements Comparable<OutcomeIncome>, Serializable {
 	private LocalDate date;
 	private boolean incomeFlag;
 	private double totalValue;
 	private String source;
 	private String notes;
+	static final private long serialVersionUID = 27L;
 
 	public OutcomeIncome(LocalDate date, boolean incomeFlag, double totalValue, String shop, String notes) {
 		this.date = date;

@@ -193,10 +193,6 @@ public class Controller {
 		dialog.getDialogPane().getButtonTypes().add(ButtonType.CANCEL);
 
 		OutcomeIncomeController outcomeIncomeController = fxmlLoader.getController();
-
-		// for testing
-		System.out.println(selectedOutcomeIncome);
-
 		outcomeIncomeController.editOutcomeIncome(selectedOutcomeIncome);
 
 		try {
@@ -204,8 +200,6 @@ public class Controller {
 			if (result.isPresent() && result.get() == ButtonType.OK) {
 				outcomeIncomeController.updateOutcomeIncome(selectedOutcomeIncome);
 
-				// data binding isn't working properly, used another way to deal with and
-				// working now correctly
 				data.saveOutcomeIncomes();
 				data.loadOutcomeIncomes();
 				handleLast30daysButton();
@@ -274,7 +268,6 @@ public class Controller {
 	public void handleLast30daysButton() {
 		if (last30daysButton.isSelected()) {
 			ObservableList<OutcomeIncome> filteredList = FXCollections.observableArrayList();
-			System.out.println(data.getOutcomeIncomes().size());
 			for (int i = 0; i < data.getOutcomeIncomes().size(); i++) {
 				if (data.getOutcomeIncomes().get(i).getDate().isAfter(LocalDate.now().minusDays(30))) {
 					filteredList.add(data.getOutcomeIncomes().get(i));

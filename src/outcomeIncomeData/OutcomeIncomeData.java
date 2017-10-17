@@ -2,23 +2,30 @@ package outcomeIncomeData;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.Collections;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 public class OutcomeIncomeData {
 
-	private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
-	private static String filename = "OutcomeIncome.dat";
+	//textFile
+//	private static String filename = "OutcomeIncome.txt";
+	
+	//binaryFile
+//	private static String filename = "OutcomeIncome.dat";
+	
+	//binaryFile with Serialization
+	private static String filename = "OutcomeIncome.bin";
+	
+	//not necessary in binaryFile with Serialization
+//	private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
 	private static ObservableList<OutcomeIncome> outcomeIncomesList;
 
@@ -40,47 +47,119 @@ public class OutcomeIncomeData {
 		outcomeIncomesList.remove(outcomeIncome);
 	}
 
-	// saving data to a binaryFile
+	// saving data to a File
 	public void saveOutcomeIncomes() {
-		try (DataOutputStream dis = new DataOutputStream(
-				new BufferedOutputStream(new FileOutputStream(filename)))) {
-			for (int i = 0; i < outcomeIncomesList.size(); i++) {
-				dis.writeUTF(outcomeIncomesList.get(i).getDate().format(formatter));
-				dis.writeBoolean(outcomeIncomesList.get(i).isIncomeFlag());
-				double totalValue;
-				totalValue = (outcomeIncomesList.get(i).isIncomeFlag()) ? outcomeIncomesList.get(i).getTotalValue() : -outcomeIncomesList.get(i).getTotalValue();
-				dis.writeDouble(totalValue);
-				dis.writeUTF(outcomeIncomesList.get(i).getSource());
-				dis.writeUTF(outcomeIncomesList.get(i).getNotes());
+		
+		//binaryFile with Serialization
+		try (ObjectOutputStream oos = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(filename)))) {
+			for (int i=0; i< outcomeIncomesList.size(); i++) {
+				oos.writeObject(outcomeIncomesList.get(i));
 			}
-		} catch (IOException e) {
-			e.printStackTrace();
+		} catch (FileNotFoundException fnfe) {
+			fnfe.getMessage();
+		} catch (IOException ioe) {
+			ioe.getMessage();
 		}
+		
+		
+		//binaryFile
+//		try (DataOutputStream dos = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(filename)))) {
+//			for (int i = 0; i < outcomeIncomesList.size(); i++) {
+//				dos.writeUTF(outcomeIncomesList.get(i).getDate().format(formatter));
+//				dos.writeBoolean(outcomeIncomesList.get(i).isIncomeFlag());
+//				double totalValue;
+//				totalValue = (outcomeIncomesList.get(i).isIncomeFlag()) ? outcomeIncomesList.get(i).getTotalValue()	: -outcomeIncomesList.get(i).getTotalValue();
+//				dos.writeDouble(totalValue);
+//				dos.writeUTF(outcomeIncomesList.get(i).getSource());
+//				dos.writeUTF(outcomeIncomesList.get(i).getNotes());
+//			}
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+		
+		//textFile
+//		try (BufferedWriter bw = new BufferedWriter(new FileWriter(filename))) {
+//			for (int i = 0; i < outcomeIncomesList.size(); i++) {
+//				OutcomeIncome item = outcomeIncomesList.get(i);
+//				StringBuilder sb = new StringBuilder();
+//				sb.append(item.getDate().format(formatter));
+//				sb.append("//");
+//				sb.append(item.isIncomeFlag());
+//				sb.append("//");
+//				sb = item.isIncomeFlag() ? sb.append(item.getTotalValue()) : sb.append(-item.getTotalValue());
+//				sb.append("//");
+//				sb.append(item.getSource());
+//				sb.append("//");
+//				sb.append(item.getNotes());
+//				bw.write(sb.toString());
+//				bw.newLine();
+//			}
+//		} catch (Exception e) {
+//			e.getMessage();
+//		}
 	}
 
-	// loading data from a binaryFile
+	// loading data from a File
 	public void loadOutcomeIncomes() {
 		outcomeIncomesList = FXCollections.observableArrayList();
-
-		try (DataInputStream dis = new DataInputStream(
-				new BufferedInputStream(new FileInputStream(filename)))) {
+		
+		//binaryFile with Serialization
+		try (ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(new FileInputStream(filename)))) {
 			boolean eof = false;
 			while (!eof) {
 				try {
-					String dateString = dis.readUTF();
-					LocalDate date = LocalDate.parse(dateString, formatter);
-					boolean incomeFlag = dis.readBoolean();
-					double totalValue = dis.readDouble();
-					String source = dis.readUTF();
-					String notes = dis.readUTF();
-					outcomeIncomesList.add(new OutcomeIncome(date, incomeFlag, totalValue, source, notes));
-				} catch (EOFException e) {
+					outcomeIncomesList.add((OutcomeIncome) ois.readObject());
+				} catch (ClassNotFoundException cnfe) {
+					cnfe.getMessage();
+				} catch (EOFException eofe) {
 					eof = true;
 				}
 			}
-		} catch (IOException e) {
-			e.printStackTrace();
+		} catch (IOException ioe) {
+			ioe.getMessage();
 		}
+		
+		//binaryFile
+//		try (DataInputStream dis = new DataInputStream(new BufferedInputStream(new FileInputStream(filename)))) {
+//			boolean eof = false;
+//			while (!eof) {
+//				try {
+//					String dateString = dis.readUTF();
+//					LocalDate date = LocalDate.parse(dateString, formatter);
+//					boolean incomeFlag = dis.readBoolean();
+//					double totalValue = dis.readDouble();
+//					String source = dis.readUTF();
+//					String notes = dis.readUTF();
+//					outcomeIncomesList.add(new OutcomeIncome(date, incomeFlag, totalValue, source, notes));
+//				} catch (EOFException e) {
+//					eof = true;
+//				}
+//			}
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+
+		//textFile
+//		try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
+//			String input;
+//			try {
+//				while ((input = br.readLine()) != null) {
+//					String[] outcomeIncomePieces = input.split("//");
+//					String dateString = outcomeIncomePieces[0];
+//					boolean incomeFlag = Boolean.parseBoolean(outcomeIncomePieces[1]);
+//					LocalDate date = LocalDate.parse(dateString, formatter);
+//					double totalValue = Double.parseDouble(outcomeIncomePieces[2]);
+//					String source = outcomeIncomePieces[3];
+//					String notes = outcomeIncomePieces[4];
+//
+//					outcomeIncomesList.add(new OutcomeIncome(date, incomeFlag, totalValue, source, notes));
+//				}
+//			} catch (Exception e) {
+//				e.getMessage();
+//			}
+//		} catch (Exception e) {
+//			e.getMessage();
+//		}
 	}
 
 }
