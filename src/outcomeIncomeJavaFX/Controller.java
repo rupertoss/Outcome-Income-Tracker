@@ -3,7 +3,6 @@ package outcomeIncomeJavaFX;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Optional;
-
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -76,7 +75,6 @@ public class Controller {
 	private Label averageIncomeLabel;
 	
 	
-	
 	public void initialize() {
 		data = new OutcomeIncomeData();
 		data.loadOutcomeIncomes();
@@ -85,7 +83,7 @@ public class Controller {
 		outcomeIncomesTable.getSortOrder().add(tableColumnDate);
 		
 		displayStatistics();
-
+		
 		// ContextMenu for TableView entries "edit/delete"
 		contextMenu = new ContextMenu();
 
@@ -280,7 +278,6 @@ public class Controller {
 			for (int i = 0; i < data.getOutcomeIncomes().size(); i++) {
 				if (data.getOutcomeIncomes().get(i).getDate().isAfter(LocalDate.now().minusDays(30))) {
 					filteredList.add(data.getOutcomeIncomes().get(i));
-
 				}
 			}
 			outcomeIncomesTable.setItems(filteredList);

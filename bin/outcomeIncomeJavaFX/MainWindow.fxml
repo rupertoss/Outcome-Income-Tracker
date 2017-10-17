@@ -58,7 +58,7 @@
          </VBox>
     </top>
     <left>
-		<VBox minWidth="200" alignment="TOP_CENTER">
+		<VBox prefWidth="200" alignment="TOP_CENTER">
 			<Label fx:id="statisticsLabel" textAlignment="LEFT" alignment="BASELINE_RIGHT">
 				<font>
 					<Font name="Calibri bold" size="16"/>

@@ -4,16 +4,14 @@ import java.time.LocalDate;
 
 public class OutcomeIncome implements Comparable<OutcomeIncome> {
 	private LocalDate date;
-	boolean incomeFlag;
+	private boolean incomeFlag;
 	private double totalValue;
 	private String source;
-	static private int outcomeIncomeId;
 	private String notes;
 
 	public OutcomeIncome(LocalDate date, boolean incomeFlag, double totalValue, String shop, String notes) {
 		this.date = date;
 		this.source = shop;
-		outcomeIncomeId++;
 		this.notes = notes;
 		this.totalValue = incomeFlag ? totalValue : -totalValue;
 		this.incomeFlag = incomeFlag;
@@ -49,10 +47,6 @@ public class OutcomeIncome implements Comparable<OutcomeIncome> {
 
 	public void setTotalValue(double totalValue) {
 		this.totalValue = totalValue;
-	}
-
-	public static int getOutcomeIncomeId() {
-		return outcomeIncomeId;
 	}
 
 	public boolean isIncomeFlag() {
