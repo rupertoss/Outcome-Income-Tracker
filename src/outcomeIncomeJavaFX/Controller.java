@@ -76,7 +76,7 @@ public class Controller {
 	
 	
 	public void initialize() {
-		data = new OutcomeIncomeData();
+		data = OutcomeIncomeData.getInstance();
 		data.loadOutcomeIncomes();
 		outcomeIncomesTable.setItems(data.getOutcomeIncomes());
 		tableColumnDate.setSortType(TableColumn.SortType.ASCENDING);

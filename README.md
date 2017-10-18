@@ -20,10 +20,10 @@ added statistics
 - 1.07	binary format of storing data instead of text file
 further minor changes
 - 1.08	binary format with Serialization
+- 1.09	data stored in singleton
 		
 	
 
 Still to implement:
 - cell colors
-- singleton
 - better exception handling

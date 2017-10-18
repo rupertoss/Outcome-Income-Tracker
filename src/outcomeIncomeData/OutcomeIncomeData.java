@@ -27,12 +27,17 @@ public class OutcomeIncomeData {
 	//not necessary in binaryFile with Serialization
 //	private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
+	private static OutcomeIncomeData instance = new OutcomeIncomeData(); 
 	private static ObservableList<OutcomeIncome> outcomeIncomesList;
 
-	public OutcomeIncomeData() {
+	private OutcomeIncomeData() {
 		outcomeIncomesList = FXCollections.observableArrayList();
 	}
 
+	public static OutcomeIncomeData getInstance() {
+		return instance;
+	}
+	
 	// return pre-sorted list by date
 	public ObservableList<OutcomeIncome> getOutcomeIncomes() {
 		Collections.sort(outcomeIncomesList);
