@@ -21,9 +21,9 @@ added statistics
 further minor changes
 - 1.08	binary format with Serialization
 - 1.09	data stored in singleton
+- 1.10	better exceptions handling
 		
 	
 
 Still to implement:
 - cell colors
-- better exception handling

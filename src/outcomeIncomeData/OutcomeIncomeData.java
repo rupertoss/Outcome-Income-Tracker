@@ -12,6 +12,7 @@ import java.io.ObjectOutputStream;
 import java.util.Collections;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.control.Alert;
 
 public class OutcomeIncomeData {
 
@@ -60,10 +61,8 @@ public class OutcomeIncomeData {
 			for (int i=0; i< outcomeIncomesList.size(); i++) {
 				oos.writeObject(outcomeIncomesList.get(i));
 			}
-		} catch (FileNotFoundException fnfe) {
-			fnfe.getMessage();
 		} catch (IOException ioe) {
-			ioe.getMessage();
+			showIOExceptionAlert(ioe);
 		}
 		
 		
@@ -115,13 +114,16 @@ public class OutcomeIncomeData {
 				try {
 					outcomeIncomesList.add((OutcomeIncome) ois.readObject());
 				} catch (ClassNotFoundException cnfe) {
-					cnfe.getMessage();
+					Alert alert = new Alert(Alert.AlertType.ERROR);
+					alert.setHeaderText("Couldn't read data from a file.\nFile may be corrupted");
+					alert.setContentText(cnfe.getClass().getSimpleName() + "\n" + cnfe.getMessage());
+					alert.showAndWait();
 				} catch (EOFException eofe) {
 					eof = true;
 				}
 			}
 		} catch (IOException ioe) {
-			ioe.getMessage();
+			showIOExceptionAlert(ioe);
 		}
 		
 		//binaryFile
@@ -165,6 +167,13 @@ public class OutcomeIncomeData {
 //		} catch (Exception e) {
 //			e.getMessage();
 //		}
+	}
+	
+	private void showIOExceptionAlert (IOException ioe) {
+		Alert alert = new Alert (Alert.AlertType.ERROR);
+		alert.setHeaderText("Couldn't reach a file.");
+		alert.setContentText("File may not exist or you don't have permission to access it\n\n\n" + ioe.getClass().getSimpleName() + "\n" + ioe.getMessage());
+		alert.showAndWait();
 	}
 
 }

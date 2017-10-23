@@ -157,9 +157,8 @@ public class Controller {
 				data.saveOutcomeIncomes();
 				displayStatistics();
 			}
-		} catch (Exception e) {
-			showErrorAlert();
-			e.printStackTrace();
+		} catch (IllegalArgumentException iae) {
+			showIllegalArgumentExceptionAlert(iae);
 			return;
 		}
 	}
@@ -206,9 +205,8 @@ public class Controller {
 				outcomeIncomesTable.getSortOrder().add(tableColumnDate);
 				displayStatistics();
 			}
-		} catch (Exception e) {
-			showErrorAlert();
-			e.printStackTrace();
+		} catch (IllegalArgumentException iae) {
+			showIllegalArgumentExceptionAlert(iae);
 			return;
 		}
 	}
@@ -218,11 +216,11 @@ public class Controller {
 		Platform.exit();
 	}
 
-	private void showErrorAlert() {
+	private void showIllegalArgumentExceptionAlert(IllegalArgumentException e) {
 		Alert alert = new Alert(Alert.AlertType.ERROR);
-		alert.setTitle("Wrong Input Data");
+		alert.setHeaderText("Wrong Input Data");
 		alert.setContentText(
-				"Please fill correctly all the fields\n\nTotal Value field is required - decimal pointer is comma (.)\nSource field is required\nNotes field is not required");
+				"Please fill correctly all the fields\n\nTotal Value field is required - decimal pointer is comma (.)\nSource field is required\nNotes field is not required" + "\n\n\n" + e.getClass().getSimpleName() + "\n" + e.getMessage());
 		alert.showAndWait();
 	}
 
