@@ -1,8 +1,12 @@
 package outcomeIncomeJavaFX;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.Optional;
+
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -24,6 +28,8 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
 import outcomeIncomeData.OutcomeIncome;
 import outcomeIncomeData.OutcomeIncomeData;
 
@@ -49,41 +55,40 @@ public class Controller {
 
 	@FXML
 	private Label statisticsLabel;
-	
+
 	@FXML
 	private Label totalMoneyLabel;
-	
+
 	@FXML
 	private Label totalOutcomeLabel;
-	
+
 	@FXML
 	private Label totalIncomeLabel;
-	
+
 	@FXML
 	private Label nrOfEntriesLabel;
-	
+
 	@FXML
 	private Label nrOfOutcomesLabel;
-	
+
 	@FXML
 	private Label nrOfIncomesLabel;
-	
+
 	@FXML
 	private Label averageOutcomeLabel;
-	
+
 	@FXML
 	private Label averageIncomeLabel;
-	
-	
+
 	public void initialize() {
+		//create singleton, loading and sorting data, loading statistics
 		data = OutcomeIncomeData.getInstance();
-		data.loadOutcomeIncomes();
+		data.loadOutcomeIncomes(new File(data.getFilename()), false);
 		outcomeIncomesTable.setItems(data.getOutcomeIncomes());
 		tableColumnDate.setSortType(TableColumn.SortType.ASCENDING);
 		outcomeIncomesTable.getSortOrder().add(tableColumnDate);
-		
 		displayStatistics();
-		
+
 		// ContextMenu for TableView entries "edit/delete"
 		contextMenu = new ContextMenu();
 
@@ -99,11 +104,11 @@ public class Controller {
 		editMenuItem.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
-				showEditOutcomeIncomeDialog();
+				showEditingDialog();
 			}
 		});
 
-		// show context menu over whole TableView including empty rows :/
+		// showing context menu over whole TableView - including empty rows :/
 		contextMenu.getItems().addAll(editMenuItem, deleteMenuItem);
 		outcomeIncomesTable.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
 			@Override
@@ -128,7 +133,7 @@ public class Controller {
 
 	// Showing dialog to add new Outcome/Income
 	@FXML
-	public void showOutcomeIncomeDialog() {
+	public void showAddingDialog() {
 		Dialog<ButtonType> dialog = new Dialog<ButtonType>();
 		dialog.initOwner(mainPanel.getScene().getWindow());
 		dialog.setTitle("Add new Outcome/Income");
@@ -136,9 +141,8 @@ public class Controller {
 		fxmlLoader.setLocation(getClass().getResource("OutcomeIncomeDialog.fxml"));
 		try {
 			dialog.getDialogPane().setContent(fxmlLoader.load());
-		} catch (IOException e) {
-			System.out.println("Couldn't load the dialog");
-			e.printStackTrace();
+		} catch (IOException ioe) {
+			showIOExceptionAlert(ioe);
 			return;
 		}
 
@@ -154,18 +158,17 @@ public class Controller {
 				data.addOutcomeIncome(newOutcomeIncome);
 				handleLast30daysButton();
 				outcomeIncomesTable.getSortOrder().add(tableColumnDate);
-				data.saveOutcomeIncomes();
 				displayStatistics();
 			}
 		} catch (IllegalArgumentException iae) {
-			showIllegalArgumentExceptionAlert(iae);
+			showWrongInputAlert(iae);
 			return;
 		}
 	}
 
 	// Showing dialog to edit existing Outcome/Income
 	@FXML
-	public void showEditOutcomeIncomeDialog() {
+	public void showEditingDialog() {
 		OutcomeIncome selectedOutcomeIncome = outcomeIncomesTable.getSelectionModel().getSelectedItem();
 		// Alert if no entry selected
 		if (selectedOutcomeIncome == null) {
@@ -198,15 +201,18 @@ public class Controller {
 			Optional<ButtonType> result = dialog.showAndWait();
 			if (result.isPresent() && result.get() == ButtonType.OK) {
 				outcomeIncomeController.updateOutcomeIncome(selectedOutcomeIncome);
-
-				data.saveOutcomeIncomes();
-				data.loadOutcomeIncomes();
+				Path tempFile = Files.createTempFile("spendingsTracker", ".bin");
+				data.saveOutcomeIncomes(tempFile.toFile());
+				data.loadOutcomeIncomes(tempFile.toFile(), false);
 				handleLast30daysButton();
 				outcomeIncomesTable.getSortOrder().add(tableColumnDate);
 				displayStatistics();
 			}
 		} catch (IllegalArgumentException iae) {
-			showIllegalArgumentExceptionAlert(iae);
+			showWrongInputAlert(iae);
+			return;
+		} catch (IOException ioe) {
+			showIOExceptionAlert(ioe);
 			return;
 		}
 	}
@@ -216,11 +222,21 @@ public class Controller {
 		Platform.exit();
 	}
 
-	private void showIllegalArgumentExceptionAlert(IllegalArgumentException e) {
+	public void showWrongInputAlert(IllegalArgumentException e) {
 		Alert alert = new Alert(Alert.AlertType.ERROR);
 		alert.setHeaderText("Wrong Input Data");
 		alert.setContentText(
-				"Please fill correctly all the fields\n\nTotal Value field is required - decimal pointer is comma (.)\nSource field is required\nNotes field is not required" + "\n\n\n" + e.getClass().getSimpleName() + "\n" + e.getMessage());
+				"Please fill correctly all the fields\n\nTotal Value field is required - decimal pointer is comma (.)\nSource field is required\nNotes field is not required"
+						+ "\n\n\n" + e.getClass().getSimpleName() + "\n" + e.getMessage());
+		alert.showAndWait();
+	}
+	
+
+	public static void showIOExceptionAlert(IOException ioe) {
+		Alert alert = new Alert(Alert.AlertType.ERROR);
+		alert.setHeaderText("Couldn't reach a file.");
+		alert.setContentText("File may not exist or you don't have permission to access it\n\n\n"
+				+ ioe.getClass().getSimpleName() + "\n" + ioe.getMessage());
 		alert.showAndWait();
 	}
 
@@ -247,7 +263,6 @@ public class Controller {
 
 		if (result.isPresent() && result.get() == ButtonType.OK) {
 			data.deleteOutcomeIncome(selectedOutcomeIncome);
-			data.saveOutcomeIncomes();
 			handleLast30daysButton();
 			displayStatistics();
 		}
@@ -282,9 +297,9 @@ public class Controller {
 
 	@FXML
 	public void saveData() {
-		data.saveOutcomeIncomes();
+		data.saveOutcomeIncomes(new File(data.getFilename()));
 	}
-	
+
 	public void displayStatistics() {
 		double totalMoney = 0;
 		double outcomeMoney = 0;
@@ -294,34 +309,75 @@ public class Controller {
 		int nrOfIncomes = 0;
 		double averageOutcome = 0;
 		double averageIncome = 0;
-		
-		for (int i=0; i<outcomeIncomesTable.getItems().size(); i++) {
-			//calculating totalValue of entries
+
+		for (int i = 0; i < outcomeIncomesTable.getItems().size(); i++) {
+			// calculating totalValue of entries
 			totalMoney += outcomeIncomesTable.getItems().get(i).getTotalValue();
-			//calculating in division of outcome or income
-			if(outcomeIncomesTable.getItems().get(i).getTotalValue() < 0) {
+			// calculating in division of outcome or income
+			if (outcomeIncomesTable.getItems().get(i).getTotalValue() < 0) {
 				outcomeMoney += outcomeIncomesTable.getItems().get(i).getTotalValue();
 				nrOfOutcomes++;
-			}
-			else {
+			} else {
 				incomeMoney += outcomeIncomesTable.getItems().get(i).getTotalValue();
 				nrOfIncomes++;
 			}
 		}
-		
-		//setting average to 0 if nrOfOutcomes/Incomes = 0
+
+		// setting average to 0 if nrOfOutcomes/Incomes = 0
 		averageOutcome = nrOfOutcomes != 0 ? outcomeMoney / nrOfOutcomes : 0;
 		averageIncome = nrOfIncomes != 0 ? incomeMoney / nrOfIncomes : 0;
 
-			statisticsLabel.setText("Statistics");
-			totalMoneyLabel.setText(String.format("%.2f", totalMoney));
-			totalOutcomeLabel.setText(String.format("%.2f", outcomeMoney));
-			totalIncomeLabel.setText(String.format("%.2f", incomeMoney));
-			nrOfEntriesLabel.setText("" + nrOfEntries);
-			nrOfOutcomesLabel.setText("" + nrOfOutcomes);
-			nrOfIncomesLabel.setText("" + nrOfIncomes);
-			averageOutcomeLabel.setText(String.format("%.2f", averageOutcome));
-			averageIncomeLabel.setText(String.format("%.2f", averageIncome));
+		statisticsLabel.setText("Statistics");
+		totalMoneyLabel.setText(String.format("%.2f", totalMoney));
+		totalOutcomeLabel.setText(String.format("%.2f", outcomeMoney));
+		totalIncomeLabel.setText(String.format("%.2f", incomeMoney));
+		nrOfEntriesLabel.setText("" + nrOfEntries);
+		nrOfOutcomesLabel.setText("" + nrOfOutcomes);
+		nrOfIncomesLabel.setText("" + nrOfIncomes);
+		averageOutcomeLabel.setText(String.format("%.2f", averageOutcome));
+		averageIncomeLabel.setText(String.format("%.2f", averageIncome));
 	}
 	
+	//showing fileChooser to open and add/replace
+	public void openNewData() {
+		
+		//creating FileChooser
+		FileChooser fc = new FileChooser();
+		fc.setTitle("Open a new data file");
+		fc.setInitialDirectory(new File(System.getProperty("user.dir")));
+		fc.getExtensionFilters().addAll(new ExtensionFilter("Binary files", "*.bin", "*.dat"),
+				new ExtensionFilter("All files", "*.*"));
+		File file = fc.showOpenDialog(mainPanel.getScene().getWindow());
+		
+		//if file was selected show dialog to choose to add/replace data
+		if (file != null) {
+			Alert alert = new Alert(Alert.AlertType.WARNING);
+			ButtonType add = new ButtonType("Add");
+			ButtonType replace = new ButtonType("Replace");
+			alert.setHeaderText("Add or Replace?");
+			alert.setContentText("Do you want to Add new data to existing one or Replace it with selected file data?");
+			alert.getDialogPane().getButtonTypes().setAll(add, replace, ButtonType.CANCEL);
+			
+			Optional<ButtonType> result = alert.showAndWait();
+			if (result.get() == ButtonType.CANCEL)
+				return;
+			else {
+				boolean addFlag = (result.get() == add) ? true : false;
+				data.loadOutcomeIncomes(file, addFlag);
+				handleLast30daysButton();
+				outcomeIncomesTable.getSortOrder().add(tableColumnDate);
+				displayStatistics();
+			}
+		}
+	}
+
+	@FXML
+	public void saveAsData() {
+		FileChooser fc = new FileChooser();
+		fc.setTitle("Save data as...");
+		fc.setInitialDirectory(new File(System.getProperty("user.dir")));
+		fc.getExtensionFilters().add(new ExtensionFilter("Binary files", "*.bin"));
+		data.saveOutcomeIncomes(fc.showSaveDialog(mainPanel.getScene().getWindow()));
+	}
+
 }

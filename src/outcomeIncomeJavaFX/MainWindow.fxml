@@ -17,27 +17,30 @@
 			<MenuBar>
 				<Menu text="File">
 					<items>
+						<MenuItem text="Open and add/replace..." onAction="#openNewData"/>
+						<SeparatorMenuItem/>
 						<MenuItem text="Save" onAction="#saveData"/>
+						<MenuItem text="Save as..." onAction="#saveAsData"/>
 						<SeparatorMenuItem/>
 						<MenuItem text="Exit" onAction="#handleExit"/>
 					</items>
 				</Menu>
 				<Menu text="Modify data">
 					<items>
-						<MenuItem text="Add..." onAction="#showOutcomeIncomeDialog"/>
-						<MenuItem text="Edit..." onAction="#showEditOutcomeIncomeDialog"/>
+						<MenuItem text="Add..." onAction="#showAddingDialog"/>
+						<MenuItem text="Edit..." onAction="#showEditingDialog"/>
 						<MenuItem text="Delete..." onAction="#deleteOutcomeIncome"/>
 					</items>
 				</Menu>
 			</MenuBar>
 			<ToolBar>
 				<HBox spacing="10">
-					<Button text="Add" onAction="#showOutcomeIncomeDialog">
+					<Button text="Add" onAction="#showAddingDialog">
 						<tooltip>
 							<Tooltip text="Add new Outcome/Income"/>
 						</tooltip>
 					</Button>
-					<Button text="Edit" onAction="#showEditOutcomeIncomeDialog">
+					<Button text="Edit" onAction="#showEditingDialog">
 						<tooltip>
 							<Tooltip text="Edit selected Outcome/Income"/>
 						</tooltip>
