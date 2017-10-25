@@ -219,6 +219,18 @@ public class Controller {
 
 	@FXML
 	public void handleExit() {
+		Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+		alert.getButtonTypes().clear();
+		alert.getButtonTypes().addAll(ButtonType.YES, ButtonType.NO, ButtonType.CANCEL);
+		alert.setTitle("Quitting...");
+		alert.setHeaderText("Do you want to save data before quitting?");
+		Optional<ButtonType> result = alert.showAndWait();
+		if (result.get() == ButtonType.CANCEL)
+			return;
+		else {
+			if (result.get() == ButtonType.YES)
+				data.saveOutcomeIncomes(new File(data.getFilename()));
+		}
 		Platform.exit();
 	}
 

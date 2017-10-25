@@ -20,6 +20,7 @@ further minor changes
 - 1.09	data stored in singleton
 - 1.10	better exceptions handling
 - 1.11	open new data (adding to or replacing existing data) and save as
+- 1.12	showing save data prompt on closing
 		
 	
 
