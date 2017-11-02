@@ -21,6 +21,7 @@ further minor changes
 - 1.10	better exceptions handling
 - 1.11	open new data (adding to or replacing existing data) and save as
 - 1.12	showing save data prompt on closing
+- 1.13	lambda expressions on event handlers
 		
 	
 

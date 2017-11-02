@@ -6,12 +6,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.Optional;
-
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Alert;
@@ -93,42 +90,51 @@ public class Controller {
 		contextMenu = new ContextMenu();
 
 		MenuItem deleteMenuItem = new MenuItem("Delete");
-		deleteMenuItem.setOnAction(new EventHandler<ActionEvent>() {
-			@Override
-			public void handle(ActionEvent event) {
-				deleteOutcomeIncome();
-			}
-		});
+		deleteMenuItem.setOnAction(event -> deleteOutcomeIncome());
+		//Anonymous Class
+//		deleteMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+//			@Override
+//			public void handle(ActionEvent event) {
+//				deleteOutcomeIncome();
+//			}
+//		});
 
 		MenuItem editMenuItem = new MenuItem("Edit");
-		editMenuItem.setOnAction(new EventHandler<ActionEvent>() {
-			@Override
-			public void handle(ActionEvent event) {
-				showEditingDialog();
-			}
-		});
+		editMenuItem.setOnAction(event -> showEditingDialog());
+		//Anonymous Class
+//		editMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+//			@Override
+//			public void handle(ActionEvent event) {
+//				showEditingDialog();
+//			}
+//		});
 
 		// showing context menu over whole TableView - including empty rows :/
 		contextMenu.getItems().addAll(editMenuItem, deleteMenuItem);
-		outcomeIncomesTable.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
-			@Override
-			public void handle(MouseEvent event) {
-				if (event.getButton() == MouseButton.SECONDARY) {
-
-					// lambda expression not working (probably because of row.emptyProperty()
-
-					// TableRow<OutcomeIncome> row = new TableRow<>();
-					// row.emptyProperty().addListener((obs, wasEmpty, isNowEmpty) -> {
-					// if (isNowEmpty)
-					// row.setContextMenu(null);
-					// else
-					// row.setContextMenu(contextMenu);
-					// });
-
-					contextMenu.show(outcomeIncomesTable, event.getScreenX(), event.getScreenY());
-				}
-			}
+		outcomeIncomesTable.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
+			if (event.getButton() == MouseButton.SECONDARY)
+				contextMenu.show(outcomeIncomesTable, event.getScreenX(), event.getScreenY());
 		});
+		//Anonymous Class
+//		outcomeIncomesTable.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+//			@Override
+//			public void handle(MouseEvent event) {
+//				if (event.getButton() == MouseButton.SECONDARY) {
+//
+//					// lambda expression not working (probably because of row.emptyProperty()
+//
+//					// TableRow<OutcomeIncome> row = new TableRow<>();
+//					// row.emptyProperty().addListener((obs, wasEmpty, isNowEmpty) -> {
+//					// if (isNowEmpty)
+//					// row.setContextMenu(null);
+//					// else
+//					// row.setContextMenu(contextMenu);
+//					// });
+//
+//					contextMenu.show(outcomeIncomesTable, event.getScreenX(), event.getScreenY());
+//				}
+//			}
+//		});
 	}
 
 	// Showing dialog to add new Outcome/Income
