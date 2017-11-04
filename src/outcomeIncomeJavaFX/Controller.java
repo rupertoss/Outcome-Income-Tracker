@@ -80,6 +80,13 @@ public class Controller {
 	public void initialize() {
 		//create singleton, loading and sorting data, loading statistics
 		data = OutcomeIncomeData.getInstance();
+		
+		if (!data.open()) {
+			//implementation of an alert.error
+		}
+		
+		
+		
 		data.loadOutcomeIncomes(new File(data.getFilename()), false);
 		outcomeIncomesTable.setItems(data.getOutcomeIncomes());
 		tableColumnDate.setSortType(TableColumn.SortType.ASCENDING);

@@ -9,6 +9,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.Collections;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -190,9 +193,46 @@ public class OutcomeIncomeData {
 		}
 	}
 
-
 	public String getFilename() {
 		return filename;
 	}
 
+	
+	
+	public final String DB_NAME = "oidata.db";
+	public final String CONNECTION = "jdbc:sqlite:" + DB_NAME;
+	
+	public final String COLUMN_ID = "_id";
+	public final String COLUMN_INCOMEFLAG = "incomeFlag";
+	public final String COLUMN_VALUE = "value";
+	public final String COLUMN_SOURCE = "source";
+	public final String COLUMN_NOTES = "notes";
+	
+	
+	private Connection connection;
+	
+	//opening connection with database
+	public boolean open() {
+		try {
+			connection = DriverManager.getConnection(CONNECTION); 	
+			return true;
+		} catch (SQLException e) {
+			//need implementation of alert.error >> controller
+			System.out.println(e.getMessage());
+			return false;
+		}
+	}
+	
+	
+	//need implementation of closing when exiting
+	//closing connection with database
+	public void close () {
+		try {
+			if (connection != null) {
+				connection.close();
+			}
+		} catch (SQLException e) {
+			//need implementation of an error
+		}
+	}
 }
