@@ -22,6 +22,9 @@ further minor changes
 - 1.11	open new data (adding to or replacing existing data) and save as
 - 1.12	showing save data prompt on closing
 - 1.13	lambda expressions on event handlers
+
+Introduction data stored in database (using sqlite)
+- 1.14d	adding libraries and creating database
 		
 	
 

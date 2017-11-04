@@ -1,5 +1,10 @@
 package outcomeIncomeJavaFX;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
+
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
@@ -13,6 +18,14 @@ public class Main extends Application {
 	public static void main(String[] args) {
 		
 		launch(args);
+		
+		try {
+		Connection conn = DriverManager.getConnection("jdbc:sqlite:oidata.db");
+		Statement statement = conn.createStatement();
+		statement.executeQuery("CREATE TABLE outcomeIncomeData (_id INTEGER PRIMARY KEY, incomeFlag TEXT NOT NULL, value TEXT NOT NULL, source TEXT NOT NULL, notes TEXT NOT NULL)");
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+		}
 	}
 
 	@Override
