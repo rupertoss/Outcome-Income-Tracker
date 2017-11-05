@@ -56,29 +56,83 @@ public class OutcomeIncomeData {
 		return outcomeIncomesList;
 	}
 
-	public void addOutcomeIncome(OutcomeIncome outcomeIncome) {
-		outcomeIncomesList.add(outcomeIncome);
+	public void addOutcomeIncome(OutcomeIncome oi) {
+		try {
+			Statement statement = connection.createStatement();
+			StringBuilder sb = new StringBuilder();
+			sb.append("INSERT INTO ");
+			sb.append(TABLE);
+			sb.append(" (");
+			sb.append(COLUMN_DATE);
+			sb.append(", ");
+			sb.append(COLUMN_INCOMEFLAG);
+			sb.append(", ");
+			sb.append(COLUMN_VALUE);
+			sb.append(", ");
+			sb.append(COLUMN_SOURCE);
+			sb.append(", ");
+			sb.append(COLUMN_NOTES);
+			sb.append(") values ('");
+			sb.append(oi.getDate().format(formatter));
+			sb.append("', '");
+			sb.append(oi.isIncomeFlag());
+			sb.append("', '");
+			sb = oi.isIncomeFlag() ? sb.append(oi.getTotalValue()) : sb.append(-oi.getTotalValue());
+			sb.append("', '");
+			sb.append(oi.getSource());
+			sb.append("', '");
+			sb.append(oi.getNotes());
+			sb.append("')");
+			statement.execute(sb.toString());
+			sb = new StringBuilder();
+			sb.append("SELECT MAX(");
+			sb.append(COLUMN_ID);
+			sb.append(") FROM ");
+			sb.append(TABLE);
+			ResultSet lastAdded = statement.executeQuery(sb.toString());
+//			System.out.println(lastAdded.getInt(INDEX_ID));
+			oi.setId(lastAdded.getInt(INDEX_ID));
+			outcomeIncomesList.add(oi);
+		} catch (SQLException e ) {
+			System.out.println(e.getMessage());
+		}
 	}
 
-	public void deleteOutcomeIncome(OutcomeIncome outcomeIncome) {
-		outcomeIncomesList.remove(outcomeIncome);
+	public void deleteOutcomeIncome(OutcomeIncome oi) {
+		outcomeIncomesList.remove(oi);
+		try {
+			Statement statement = connection.createStatement();
+			StringBuilder sb = new StringBuilder();
+			sb.append("DELETE FROM ");
+			sb.append(TABLE);
+			sb.append(" WHERE ");
+			sb.append(COLUMN_ID);
+			sb.append(" = '");
+			sb.append(oi.getId());
+			sb.append("'");
+			statement.execute(sb.toString());
+			
+			//need proper implementation of an error (couldn't process deleting an item >> alert.error
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+		}
 	}
 
 	// saving data to a File
 	public void saveOutcomeIncomes(File file) {
 
-		if (file != null) {
-			filename = file.getAbsolutePath();
-
-			// binaryFile with Serialization
-			try (ObjectOutputStream oos = new ObjectOutputStream(
-					new BufferedOutputStream(new FileOutputStream(filename)))) {
-				for (int i = 0; i < outcomeIncomesList.size(); i++) {
-					oos.writeObject(outcomeIncomesList.get(i));
-				}
-			} catch (IOException ioe) {
-				Controller.showIOExceptionAlert(ioe);
-			}
+//		if (file != null) {
+//			filename = file.getAbsolutePath();
+//
+//			// binaryFile with Serialization
+//			try (ObjectOutputStream oos = new ObjectOutputStream(
+//					new BufferedOutputStream(new FileOutputStream(filename)))) {
+//				for (int i = 0; i < outcomeIncomesList.size(); i++) {
+//					oos.writeObject(outcomeIncomesList.get(i));
+//				}
+//			} catch (IOException ioe) {
+//				Controller.showIOExceptionAlert(ioe);
+//			}
 
 			// binaryFile
 			// try (DataOutputStream dos = new DataOutputStream(new BufferedOutputStream(new
@@ -119,38 +173,38 @@ public class OutcomeIncomeData {
 			// } catch (Exception e) {
 			// e.getMessage();
 			// }
-		}
+//		}
 	}
 
 	// loading data from a File
 	public void loadOutcomeIncomes(File file, boolean addFlag) {
 		// outcomeIncomesList = FXCollections.observableArrayList();
 
-		if (file != null) {
-			filename = file.getPath();
-
-			if (!addFlag)
-				outcomeIncomesList.clear();
-
-			// binaryFile with Serialization
-			try (ObjectInputStream ois = new ObjectInputStream(
-					new BufferedInputStream(new FileInputStream(filename)))) {
-				boolean eof = false;
-				while (!eof) {
-					try {
-						outcomeIncomesList.add((OutcomeIncome) ois.readObject());
-					} catch (ClassNotFoundException cnfe) {
-						Alert alert = new Alert(Alert.AlertType.ERROR);
-						alert.setHeaderText("Couldn't read data from a file.\nFile may be corrupted");
-						alert.setContentText(cnfe.getClass().getSimpleName() + "\n" + cnfe.getMessage());
-						alert.showAndWait();
-					} catch (EOFException eofe) {
-						eof = true;
-					}
-				}
-			} catch (IOException ioe) {
-				Controller.showIOExceptionAlert(ioe);
-			}
+//		if (file != null) {
+//			filename = file.getPath();
+//
+//			if (!addFlag)
+//				outcomeIncomesList.clear();
+//
+//			// binaryFile with Serialization
+//			try (ObjectInputStream ois = new ObjectInputStream(
+//					new BufferedInputStream(new FileInputStream(filename)))) {
+//				boolean eof = false;
+//				while (!eof) {
+//					try {
+//						outcomeIncomesList.add((OutcomeIncome) ois.readObject());
+//					} catch (ClassNotFoundException cnfe) {
+//						Alert alert = new Alert(Alert.AlertType.ERROR);
+//						alert.setHeaderText("Couldn't read data from a file.\nFile may be corrupted");
+//						alert.setContentText(cnfe.getClass().getSimpleName() + "\n" + cnfe.getMessage());
+//						alert.showAndWait();
+//					} catch (EOFException eofe) {
+//						eof = true;
+//					}
+//				}
+//			} catch (IOException ioe) {
+//				Controller.showIOExceptionAlert(ioe);
+//			}
 
 			// binaryFile
 			// try (DataInputStream dis = new DataInputStream(new BufferedInputStream(new
@@ -196,14 +250,12 @@ public class OutcomeIncomeData {
 			// } catch (Exception e) {
 			// e.getMessage();
 			// }
-		}
+//		}
 	}
 
 	public String getFilename() {
 		return filename;
 	}
-
-	
 	
 	public final String DB_NAME = "oidata.db";
 	public final String CONNECTION = "jdbc:sqlite:" + DB_NAME;
@@ -225,12 +277,13 @@ public class OutcomeIncomeData {
 	public final int INDEX_NOTES = 6;
 	
 	
-	private Connection connection; 
+	public Connection connection; 
 	
 	//opening connection with database
 	public boolean open() {
 		try {
 			connection = DriverManager.getConnection(CONNECTION);
+			connection.setAutoCommit(false);
 			return true;
 		} catch (SQLException e) {
 			//need implementation of alert.error >> controller
@@ -241,6 +294,7 @@ public class OutcomeIncomeData {
 	
 	public void close() {
 		try {
+			connection.rollback();
 			connection.close();
 		} catch (SQLException e ) {
 			System.out.println(e.getMessage());
@@ -249,18 +303,59 @@ public class OutcomeIncomeData {
 	
 	
 	public void loadDB() {
-		try (Statement statement = connection.createStatement();
-				ResultSet results = statement.executeQuery("SELECT * FROM " + TABLE);) {
+		try {
+			Statement statement = connection.createStatement();
+			ResultSet results = statement.executeQuery("SELECT * FROM " + TABLE);
 			
 			while (results.next()) {
+				int id = results.getInt(INDEX_ID);
 				LocalDate date = LocalDate.parse(results.getString(INDEX_DATE), formatter);
-				boolean incomeFlag = results.getBoolean(INDEX_INCOMEFLAG);
+				boolean incomeFlag = Boolean.parseBoolean(results.getString(INDEX_INCOMEFLAG));
 				double totalValue = results.getDouble(INDEX_VALUE);
 				String source = results.getString(INDEX_SOURCE);
 				String notes = results.getString(INDEX_NOTES);
-				outcomeIncomesList.add(new OutcomeIncome (date, incomeFlag, totalValue, source, notes));
+//				System.out.println(new OutcomeIncome (id, date, incomeFlag, totalValue, source, notes));
+				outcomeIncomesList.add(new OutcomeIncome (id, date, incomeFlag, totalValue, source, notes));
 			}
 		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+		}
+	}
+	
+	public void updateDB (OutcomeIncome oi) {
+		try {
+			Statement statement = connection.createStatement();
+			StringBuilder sb = new StringBuilder();
+			sb.append("UPDATE ");
+			sb.append(TABLE);
+			sb.append(" SET ");
+			sb.append(COLUMN_DATE);
+			sb.append(" = '");
+			sb.append(oi.getDate());
+			sb.append("', ");
+			sb.append(COLUMN_INCOMEFLAG);
+			sb.append(" = '");
+			sb.append(oi.isIncomeFlag());
+			sb.append("', ");
+			sb.append(COLUMN_VALUE);
+			sb.append(" = '");
+			sb = oi.isIncomeFlag() ? sb.append(oi.getTotalValue()) : sb.append(-oi.getTotalValue());
+			sb.append("', ");
+			sb.append(COLUMN_SOURCE);
+			sb.append(" = '");
+			sb.append(oi.getSource());
+			sb.append("', ");
+			sb.append(COLUMN_NOTES);
+			sb.append(" = '");
+			sb.append(oi.getNotes());
+			sb.append("' WHERE ");
+			sb.append(COLUMN_ID);
+			sb.append(" = '");
+			sb.append(oi.getId());
+			sb.append("'");
+//			System.out.println(sb.toString());
+			statement.execute(sb.toString());
+		} catch (SQLException e ) {
 			System.out.println(e.getMessage());
 		}
 	}
@@ -294,10 +389,8 @@ public class OutcomeIncomeData {
 				sb.append("', '");
 				sb.append(oi.getNotes());
 				sb.append("')");
-				
-				System.out.println(sb.toString());
+//				System.out.println(sb.toString());
 				statement.execute(sb.toString());
-//				statement.execute("DELETE FROM " + TABLE);
 			}
 			
 		} catch (SQLException e) {

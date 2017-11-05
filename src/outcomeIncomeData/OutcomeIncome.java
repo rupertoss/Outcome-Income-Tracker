@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.time.LocalDate;
 
 public class OutcomeIncome implements Comparable<OutcomeIncome>, Serializable {
+	private int id = -1;
 	private LocalDate date;
 	private boolean incomeFlag;
 	private double totalValue;
@@ -11,12 +12,25 @@ public class OutcomeIncome implements Comparable<OutcomeIncome>, Serializable {
 	private String notes;
 	static final private long serialVersionUID = 27L;
 
-	public OutcomeIncome(LocalDate date, boolean incomeFlag, double totalValue, String shop, String notes) {
+	public OutcomeIncome(LocalDate date, boolean incomeFlag, double totalValue, String source, String notes) {
 		this.date = date;
-		this.source = shop;
-		this.notes = notes;
-		this.totalValue = incomeFlag ? totalValue : -totalValue;
 		this.incomeFlag = incomeFlag;
+		this.totalValue = incomeFlag ? totalValue : -totalValue;
+		this.source = source;
+		this.notes = notes;
+	}
+	
+	public OutcomeIncome(int id, LocalDate date, boolean incomeFlag, double totalValue, String source, String notes) {
+		this(date, incomeFlag, totalValue, source, notes);
+		this.id = id;
+	}
+	
+	public int getId() {
+		return id;
+	}
+	
+	public void setId(int id) {
+		this.id = id;
 	}
 
 	public LocalDate getDate() {
@@ -26,21 +40,13 @@ public class OutcomeIncome implements Comparable<OutcomeIncome>, Serializable {
 	public void setDate(LocalDate date) {
 		this.date = date;
 	}
-
-	public String getNotes() {
-		return notes;
+	
+	public boolean isIncomeFlag() {
+		return incomeFlag;
 	}
-
-	public void setNotes(String notes) {
-		this.notes = notes;
-	}
-
-	public String getSource() {
-		return source;
-	}
-
-	public void setSource(String source) {
-		this.source = source;
+	
+	public void setIncomeFlag(boolean incomeFlag) {
+		this.incomeFlag = incomeFlag;
 	}
 
 	public double getTotalValue() {
@@ -51,14 +57,27 @@ public class OutcomeIncome implements Comparable<OutcomeIncome>, Serializable {
 		this.totalValue = totalValue;
 	}
 
-	public boolean isIncomeFlag() {
-		return incomeFlag;
+	public String getSource() {
+		return source;
 	}
+
+	public void setSource(String source) {
+		this.source = source;
+	}
+
+	public String getNotes() {
+		return notes;
+	}
+
+	public void setNotes(String notes) {
+		this.notes = notes;
+	}
+	
 
 	@Override
 	public String toString() {
-		return "OutcomeIncome [date=" + date + ", incomeFlag=" + incomeFlag + ", totalValue=" + totalValue + ", source="
-				+ source + ", notes=" + notes + "]";
+		return "OutcomeIncome [id=" + id + ", date=" + date + ", incomeFlag=" + incomeFlag + ", totalValue="
+				+ totalValue + ", source=" + source + ", notes=" + notes + "]";
 	}
 	
 	@Override
@@ -66,6 +85,7 @@ public class OutcomeIncome implements Comparable<OutcomeIncome>, Serializable {
 		return this.getDate().compareTo(outcomeIncome.getDate());
 		
 	}
+
 
 
 }

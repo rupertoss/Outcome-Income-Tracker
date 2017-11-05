@@ -4,8 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Optional;
+
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -81,19 +83,17 @@ public class Controller {
 		//create singleton, loading and sorting data, loading statistics
 		data = OutcomeIncomeData.getInstance();
 		
-//		if (!data.open()) {
-//			//implementation of an alert.error and exiting application
-//		}
+		if (!data.open()) {
+			//implementation of an alert.error and exiting application
+		}
 		
-		data.loadOutcomeIncomes(new File(data.getFilename()), false);
+//		data.loadOutcomeIncomes(new File(data.getFilename()), false);
+		data.loadDB();
 		outcomeIncomesTable.setItems(data.getOutcomeIncomes());
 		tableColumnDate.setSortType(TableColumn.SortType.ASCENDING);
 		outcomeIncomesTable.getSortOrder().add(tableColumnDate);
 		displayStatistics();
-		
-		data.open();
-		data.saveDB();
-		data.close();
+
 
 		// ContextMenu for TableView entries "edit/delete"
 		contextMenu = new ContextMenu();
@@ -169,7 +169,6 @@ public class Controller {
 			if (result.isPresent() && result.get() == ButtonType.OK) {
 				OutcomeIncomeController outcomeIncomeController = fxmlLoader.getController();
 				OutcomeIncome newOutcomeIncome = outcomeIncomeController.getNewOutcomeIncome();
-				System.out.println(newOutcomeIncome);
 				data.addOutcomeIncome(newOutcomeIncome);
 				handleLast30daysButton();
 				outcomeIncomesTable.getSortOrder().add(tableColumnDate);
@@ -216,18 +215,13 @@ public class Controller {
 			Optional<ButtonType> result = dialog.showAndWait();
 			if (result.isPresent() && result.get() == ButtonType.OK) {
 				outcomeIncomeController.updateOutcomeIncome(selectedOutcomeIncome);
-				Path tempFile = Files.createTempFile("spendingsTracker", ".bin");
-				data.saveOutcomeIncomes(tempFile.toFile());
-				data.loadOutcomeIncomes(tempFile.toFile(), false);
+				data.updateDB(selectedOutcomeIncome);
 				handleLast30daysButton();
 				outcomeIncomesTable.getSortOrder().add(tableColumnDate);
 				displayStatistics();
 			}
 		} catch (IllegalArgumentException iae) {
 			showWrongInputAlert(iae);
-			return;
-		} catch (IOException ioe) {
-			showIOExceptionAlert(ioe);
 			return;
 		}
 	}
@@ -244,8 +238,10 @@ public class Controller {
 			return;
 		else {
 			if (result.get() == ButtonType.YES)
-				data.saveOutcomeIncomes(new File(data.getFilename()));
+//				data.saveOutcomeIncomes(new File(data.getFilename()));
+				saveData();
 		}
+		data.close();
 		Platform.exit();
 	}
 
@@ -257,7 +253,6 @@ public class Controller {
 						+ "\n\n\n" + e.getClass().getSimpleName() + "\n" + e.getMessage());
 		alert.showAndWait();
 	}
-	
 
 	public static void showIOExceptionAlert(IOException ioe) {
 		Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -290,6 +285,9 @@ public class Controller {
 
 		if (result.isPresent() && result.get() == ButtonType.OK) {
 			data.deleteOutcomeIncome(selectedOutcomeIncome);
+			
+			
+			
 			handleLast30daysButton();
 			displayStatistics();
 		}
@@ -324,7 +322,13 @@ public class Controller {
 
 	@FXML
 	public void saveData() {
-		data.saveOutcomeIncomes(new File(data.getFilename()));
+//		data.saveOutcomeIncomes(new File(data.getFilename()));
+		try {
+			data.connection.commit();
+		} catch (SQLException e) {
+			//need proper saving error implementation (alert.error)
+			System.out.println(e.getMessage());
+		}
 	}
 
 	public void displayStatistics() {

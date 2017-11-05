@@ -46,21 +46,26 @@ public class OutcomeIncomeController {
 	}
 	
 	//setting dialog fields by selected OutcomeIncome properties
-	public void editOutcomeIncome(OutcomeIncome outcomeIncome) {
-		datepicker.setValue(outcomeIncome.getDate());
-		if(outcomeIncome.isIncomeFlag())
+	public void editOutcomeIncome(OutcomeIncome oi) {
+		datepicker.setValue(oi.getDate());
+		if(oi.isIncomeFlag())
 			incomeButton.setSelected(true);
-		totalValueField.setText("" + outcomeIncome.getTotalValue());
-		sourceField.setText(outcomeIncome.getSource());
-		notesArea.setText(outcomeIncome.getNotes());
+		totalValueField.setText("" + oi.getTotalValue());
+		sourceField.setText(oi.getSource());
+		notesArea.setText(oi.getNotes());
 	}
 
 	//updating OutcomeIncome properties by values from editDialog 
-	public void updateOutcomeIncome(OutcomeIncome selectedOutcomeIncome) {
-		selectedOutcomeIncome.setDate(datepicker.getValue());
-		selectedOutcomeIncome.setTotalValue(Double.parseDouble(totalValueField.getText()));
-		selectedOutcomeIncome.setSource(sourceField.getText());
-		selectedOutcomeIncome.setNotes(notesArea.getText().trim());
+	public void updateOutcomeIncome(OutcomeIncome oi) {
+		oi.setDate(datepicker.getValue());
+		if (oi.isIncomeFlag() == incomeButton.isSelected()) {
+			oi.setTotalValue(Double.parseDouble(totalValueField.getText()));
+		} else {
+			oi.setIncomeFlag(incomeButton.isSelected());
+			oi.setTotalValue(-Double.parseDouble(totalValueField.getText()));
+		}
+		oi.setSource(sourceField.getText());
+		oi.setNotes(notesArea.getText().trim());
 	}
 	
 }
