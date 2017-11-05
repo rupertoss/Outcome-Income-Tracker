@@ -81,17 +81,19 @@ public class Controller {
 		//create singleton, loading and sorting data, loading statistics
 		data = OutcomeIncomeData.getInstance();
 		
-		if (!data.open()) {
-			//implementation of an alert.error
-		}
-		
-		
+//		if (!data.open()) {
+//			//implementation of an alert.error and exiting application
+//		}
 		
 		data.loadOutcomeIncomes(new File(data.getFilename()), false);
 		outcomeIncomesTable.setItems(data.getOutcomeIncomes());
 		tableColumnDate.setSortType(TableColumn.SortType.ASCENDING);
 		outcomeIncomesTable.getSortOrder().add(tableColumnDate);
 		displayStatistics();
+		
+		data.open();
+		data.saveDB();
+		data.close();
 
 		// ContextMenu for TableView entries "edit/delete"
 		contextMenu = new ContextMenu();

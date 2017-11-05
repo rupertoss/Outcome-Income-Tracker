@@ -26,6 +26,7 @@ further minor changes
 Introduction data stored in database (using sqlite)
 - 1.14d	adding libraries and creating database
 - 1.15d	database table constants 
+- 1.16d	data migration into database
 		
 	
 

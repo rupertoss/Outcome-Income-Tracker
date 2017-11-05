@@ -11,8 +11,15 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Alert;
@@ -30,8 +37,7 @@ public class OutcomeIncomeData {
 	private static String filename = "OutcomeIncome.bin";
 
 	// not necessary in binaryFile with Serialization
-	// private static DateTimeFormatter formatter =
-	// DateTimeFormatter.ofPattern("yyyy-MM-dd");
+	 private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
 	private static OutcomeIncomeData instance = new OutcomeIncomeData();
 	private static ObservableList<OutcomeIncome> outcomeIncomesList;
@@ -202,19 +208,29 @@ public class OutcomeIncomeData {
 	public final String DB_NAME = "oidata.db";
 	public final String CONNECTION = "jdbc:sqlite:" + DB_NAME;
 	
+	public final String TABLE = "outcomeIncomeData";
+	
 	public final String COLUMN_ID = "_id";
+	public final String COLUMN_DATE = "date";
 	public final String COLUMN_INCOMEFLAG = "incomeFlag";
 	public final String COLUMN_VALUE = "value";
 	public final String COLUMN_SOURCE = "source";
 	public final String COLUMN_NOTES = "notes";
 	
+	public final int INDEX_ID = 1;
+	public final int INDEX_DATE = 2;
+	public final int INDEX_INCOMEFLAG = 3;
+	public final int INDEX_VALUE = 4;
+	public final int INDEX_SOURCE = 5;
+	public final int INDEX_NOTES = 6;
 	
-	private Connection connection;
+	
+	private Connection connection; 
 	
 	//opening connection with database
 	public boolean open() {
 		try {
-			connection = DriverManager.getConnection(CONNECTION); 	
+			connection = DriverManager.getConnection(CONNECTION);
 			return true;
 		} catch (SQLException e) {
 			//need implementation of alert.error >> controller
@@ -223,16 +239,70 @@ public class OutcomeIncomeData {
 		}
 	}
 	
-	
-	//need implementation of closing when exiting
-	//closing connection with database
-	public void close () {
+	public void close() {
 		try {
-			if (connection != null) {
-				connection.close();
-			}
-		} catch (SQLException e) {
-			//need implementation of an error
+			connection.close();
+		} catch (SQLException e ) {
+			System.out.println(e.getMessage());
 		}
 	}
+	
+	
+	public void loadDB() {
+		try (Statement statement = connection.createStatement();
+				ResultSet results = statement.executeQuery("SELECT * FROM " + TABLE);) {
+			
+			while (results.next()) {
+				LocalDate date = LocalDate.parse(results.getString(INDEX_DATE), formatter);
+				boolean incomeFlag = results.getBoolean(INDEX_INCOMEFLAG);
+				double totalValue = results.getDouble(INDEX_VALUE);
+				String source = results.getString(INDEX_SOURCE);
+				String notes = results.getString(INDEX_NOTES);
+				outcomeIncomesList.add(new OutcomeIncome (date, incomeFlag, totalValue, source, notes));
+			}
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+		}
+	}
+	
+	public void saveDB () {
+		try {
+			Statement statement = connection.createStatement();
+			
+			for (OutcomeIncome oi : outcomeIncomesList) {
+				StringBuilder sb = new StringBuilder();
+				sb.append("INSERT INTO ");
+				sb.append(TABLE);
+				sb.append(" (");
+				sb.append(COLUMN_DATE);
+				sb.append(", ");
+				sb.append(COLUMN_INCOMEFLAG);
+				sb.append(", ");
+				sb.append(COLUMN_VALUE);
+				sb.append(", ");
+				sb.append(COLUMN_SOURCE);
+				sb.append(", ");
+				sb.append(COLUMN_NOTES);
+				sb.append(") values ('");
+				sb.append(oi.getDate().format(formatter));
+				sb.append("', '");
+				sb.append(oi.isIncomeFlag());
+				sb.append("', '");
+				sb = oi.isIncomeFlag() ? sb.append(oi.getTotalValue()) : sb.append(-oi.getTotalValue());
+				sb.append("', '");
+				sb.append(oi.getSource());
+				sb.append("', '");
+				sb.append(oi.getNotes());
+				sb.append("')");
+				
+				System.out.println(sb.toString());
+				statement.execute(sb.toString());
+//				statement.execute("DELETE FROM " + TABLE);
+			}
+			
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+		}
+	}
+	
 }
