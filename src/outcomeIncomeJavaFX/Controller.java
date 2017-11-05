@@ -2,12 +2,9 @@ package outcomeIncomeJavaFX;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Optional;
-
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -83,11 +80,10 @@ public class Controller {
 		//create singleton, loading and sorting data, loading statistics
 		data = OutcomeIncomeData.getInstance();
 		
-		if (!data.open()) {
+		if (!data.open(data.CONNECTION)) {
 			//implementation of an alert.error and exiting application
 		}
 		
-//		data.loadOutcomeIncomes(new File(data.getFilename()), false);
 		data.loadDB();
 		outcomeIncomesTable.setItems(data.getOutcomeIncomes());
 		tableColumnDate.setSortType(TableColumn.SortType.ASCENDING);
@@ -100,23 +96,9 @@ public class Controller {
 
 		MenuItem deleteMenuItem = new MenuItem("Delete");
 		deleteMenuItem.setOnAction(event -> deleteOutcomeIncome());
-		//Anonymous Class
-//		deleteMenuItem.setOnAction(new EventHandler<ActionEvent>() {
-//			@Override
-//			public void handle(ActionEvent event) {
-//				deleteOutcomeIncome();
-//			}
-//		});
 
 		MenuItem editMenuItem = new MenuItem("Edit");
 		editMenuItem.setOnAction(event -> showEditingDialog());
-		//Anonymous Class
-//		editMenuItem.setOnAction(new EventHandler<ActionEvent>() {
-//			@Override
-//			public void handle(ActionEvent event) {
-//				showEditingDialog();
-//			}
-//		});
 
 		// showing context menu over whole TableView - including empty rows :/
 		contextMenu.getItems().addAll(editMenuItem, deleteMenuItem);
@@ -124,26 +106,6 @@ public class Controller {
 			if (event.getButton() == MouseButton.SECONDARY)
 				contextMenu.show(outcomeIncomesTable, event.getScreenX(), event.getScreenY());
 		});
-		//Anonymous Class
-//		outcomeIncomesTable.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
-//			@Override
-//			public void handle(MouseEvent event) {
-//				if (event.getButton() == MouseButton.SECONDARY) {
-//
-//					// lambda expression not working (probably because of row.emptyProperty()
-//
-//					// TableRow<OutcomeIncome> row = new TableRow<>();
-//					// row.emptyProperty().addListener((obs, wasEmpty, isNowEmpty) -> {
-//					// if (isNowEmpty)
-//					// row.setContextMenu(null);
-//					// else
-//					// row.setContextMenu(contextMenu);
-//					// });
-//
-//					contextMenu.show(outcomeIncomesTable, event.getScreenX(), event.getScreenY());
-//				}
-//			}
-//		});
 	}
 
 	// Showing dialog to add new Outcome/Income
@@ -238,7 +200,6 @@ public class Controller {
 			return;
 		else {
 			if (result.get() == ButtonType.YES)
-//				data.saveOutcomeIncomes(new File(data.getFilename()));
 				saveData();
 		}
 		data.close();
@@ -285,9 +246,6 @@ public class Controller {
 
 		if (result.isPresent() && result.get() == ButtonType.OK) {
 			data.deleteOutcomeIncome(selectedOutcomeIncome);
-			
-			
-			
 			handleLast30daysButton();
 			displayStatistics();
 		}
@@ -322,7 +280,6 @@ public class Controller {
 
 	@FXML
 	public void saveData() {
-//		data.saveOutcomeIncomes(new File(data.getFilename()));
 		try {
 			data.connection.commit();
 		} catch (SQLException e) {
@@ -376,7 +333,7 @@ public class Controller {
 		FileChooser fc = new FileChooser();
 		fc.setTitle("Open a new data file");
 		fc.setInitialDirectory(new File(System.getProperty("user.dir")));
-		fc.getExtensionFilters().addAll(new ExtensionFilter("Binary files", "*.bin", "*.dat"),
+		fc.getExtensionFilters().addAll(new ExtensionFilter("Databases", "*.db"),
 				new ExtensionFilter("All files", "*.*"));
 		File file = fc.showOpenDialog(mainPanel.getScene().getWindow());
 		
@@ -393,8 +350,25 @@ public class Controller {
 			if (result.get() == ButtonType.CANCEL)
 				return;
 			else {
-				boolean addFlag = (result.get() == add) ? true : false;
-				data.loadOutcomeIncomes(file, addFlag);
+				if (result.get() == replace) {
+					data.close();
+					if (!data.open("jdbc:sqlite:" + file.getPath())) {
+						//implementation of an alert.error and exiting application
+					}
+					data.getOutcomeIncomes().clear();
+					data.loadDB();
+				} else {
+					String oldConnection = data.connection.toString();
+					data.close();
+					if (!data.open("jdbc:sqlite:" + file.getPath())) {
+						//implementation of an alert.error and exiting application
+					}
+					data.loadDB();
+					data.close();
+					if (!data.open(oldConnection)) {
+						//implementation of an alert.error and exiting application
+					}
+				}
 				handleLast30daysButton();
 				outcomeIncomesTable.getSortOrder().add(tableColumnDate);
 				displayStatistics();
@@ -407,8 +381,17 @@ public class Controller {
 		FileChooser fc = new FileChooser();
 		fc.setTitle("Save data as...");
 		fc.setInitialDirectory(new File(System.getProperty("user.dir")));
-		fc.getExtensionFilters().add(new ExtensionFilter("Binary files", "*.bin"));
-		data.saveOutcomeIncomes(fc.showSaveDialog(mainPanel.getScene().getWindow()));
+		fc.getExtensionFilters().add(new ExtensionFilter("Databases", "*.db"));
+		File file = fc.showSaveDialog(mainPanel.getScene().getWindow());
+		if (file.getPath() == data.DB_NAME) 
+			saveData();
+		data.close();
+		if (!data.open("jdbc:sqlite:" + file.getPath())) {
+			//implementation of an alert.error and exiting application
+		}
+		data.createDB();
+		data.saveDB();
+		saveData();
 	}
 
 }

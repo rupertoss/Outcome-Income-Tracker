@@ -29,6 +29,7 @@ Introduction data stored in database (using sqlite)
 - 1.15d	database table constants 
 - 1.16d	data migration into database
 - 1.17d	restored program functionality (CRUD operations)
+- 1.18d	restored all functions || old code cleaned, files removed
 		
 	
 
