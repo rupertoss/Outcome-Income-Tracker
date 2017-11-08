@@ -20,7 +20,7 @@ public class Main extends Application {
 	public void start(Stage primaryStage) throws Exception {
 		
 		FXMLLoader fxmlLoaderMain = new FXMLLoader(getClass().getResource("MainWindow.fxml"));
-		Parent root = (Parent) fxmlLoaderMain.load();
+		Parent root = fxmlLoaderMain.load();
 		primaryStage.setTitle("Spendings Tracker!");
 		primaryStage.setScene(new Scene(root, 800, 600));
 		primaryStage.show();

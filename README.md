@@ -4,7 +4,7 @@ This is a my first program,
 it's a basic program which tracks your outcomes and incomes.
 
 I've created this in Eclipse using JavaFX.
-Versions ended with 'd' (from 1.14d) stores data within database (SQLite + JDBC).
+Versions ended with 'd' (from 1.14d >> branch: database) stores data within database (SQLite + JDBC).
 
 versions
 - 1.0
@@ -30,6 +30,7 @@ Introduction data stored in database (using sqlite)
 - 1.16d	data migration into database
 - 1.17d	restored program functionality (CRUD operations)
 - 1.18d	restored all functions || old code cleaned, files removed
+- 1.19d	try with resources || exception handling
 		
 	
 

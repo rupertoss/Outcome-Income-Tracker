@@ -52,9 +52,8 @@ public class OutcomeIncomeData {
 		return outcomeIncomesList;
 	}
 
-	public void addOutcomeIncome(OutcomeIncome oi) {
-		try {
-			Statement statement = connection.createStatement();
+	public SQLException addOutcomeIncome(OutcomeIncome oi) {
+		try (Statement statement = connection.createStatement()) {
 			StringBuilder sb = new StringBuilder();
 			sb.append("INSERT INTO ");
 			sb.append(TABLE);
@@ -85,19 +84,27 @@ public class OutcomeIncomeData {
 			sb.append(COLUMN_ID);
 			sb.append(") FROM ");
 			sb.append(TABLE);
-			ResultSet lastAdded = statement.executeQuery(sb.toString());
+			int affectedRows = statement.executeUpdate(sb.toString());
+			if (affectedRows != 1) 
+				throw new SQLException("Couldn't properly insert an entry!");
+			ResultSet generatedKeys = statement.getGeneratedKeys();
+			if(generatedKeys.next()) {
+				oi.setId(generatedKeys.getInt(1));
+			} else {
+				throw new SQLException("Couldn't properly insert an entry!");
+			}
 //			System.out.println(lastAdded.getInt(INDEX_ID));
-			oi.setId(lastAdded.getInt(INDEX_ID));
 			outcomeIncomesList.add(oi);
-		} catch (SQLException e ) {
-			System.out.println(e.getMessage());
+			return null;
+		} catch (SQLException sqlException) {
+			System.out.println(sqlException.getMessage());
+			return sqlException;
 		}
 	}
 
-	public void deleteOutcomeIncome(OutcomeIncome oi) {
+	public SQLException deleteOutcomeIncome(OutcomeIncome oi) {
 		outcomeIncomesList.remove(oi);
-		try {
-			Statement statement = connection.createStatement();
+		try (Statement statement = connection.createStatement()) {
 			StringBuilder sb = new StringBuilder();
 			sb.append("DELETE FROM ");
 			sb.append(TABLE);
@@ -107,41 +114,40 @@ public class OutcomeIncomeData {
 			sb.append(oi.getId());
 			sb.append("'");
 			statement.execute(sb.toString());
-			
-			//need proper implementation of an error (couldn't process deleting an item >> alert.error
-		} catch (SQLException e) {
-			System.out.println(e.getMessage());
+			return null;
+		} catch (SQLException sqlException) {
+			System.out.println(sqlException.getMessage());
+			return sqlException;
 		}
 	}
 	
 	//opening connection with database
-	public boolean open(String connectionString) {
+	public SQLException openConnection (String connectionString) {
 		try {
 			connection = DriverManager.getConnection(connectionString);
 			connection.setAutoCommit(false);
-			return true;
+			return null;
 		} catch (SQLException e) {
-			//need implementation of alert.error >> controller
 			System.out.println(e.getMessage());
-			return false;
+			return e;
 		}
 	}
 	
-	public void close() {
+	public SQLException closeConnection() {
 		try {
 			connection.rollback();
 			connection.close();
-		} catch (SQLException e ) {
-			System.out.println(e.getMessage());
+			return null;
+		} catch (SQLException sqlException ) {
+			System.out.println(sqlException.getMessage());
+			return sqlException;
 		}
 	}
 	
 	
-	public void loadDB() {
-		try {
-			Statement statement = connection.createStatement();
-			ResultSet results = statement.executeQuery("SELECT * FROM " + TABLE);
-			
+	public SQLException loadDB() {
+		try (Statement statement = connection.createStatement();
+			ResultSet results = statement.executeQuery("SELECT * FROM " + TABLE);) {
 			while (results.next()) {
 				int id = results.getInt(INDEX_ID);
 				LocalDate date = LocalDate.parse(results.getString(INDEX_DATE), formatter);
@@ -152,15 +158,15 @@ public class OutcomeIncomeData {
 //				System.out.println(new OutcomeIncome (id, date, incomeFlag, totalValue, source, notes));
 				outcomeIncomesList.add(new OutcomeIncome (id, date, incomeFlag, totalValue, source, notes));
 			}
-			results.close();
-		} catch (SQLException e) {
-			System.out.println(e.getMessage());
+			return null;
+		} catch (SQLException sqleException) {
+			System.out.println(sqleException.getMessage());
+			return sqleException;
 		}
 	}
 	
-	public void updateDB (OutcomeIncome oi) {
-		try {
-			Statement statement = connection.createStatement();
+	public SQLException updateEntryInDB (OutcomeIncome oi) {
+		try (Statement statement = connection.createStatement()) {
 			StringBuilder sb = new StringBuilder();
 			sb.append("UPDATE ");
 			sb.append(TABLE);
@@ -191,15 +197,15 @@ public class OutcomeIncomeData {
 			sb.append("'");
 //			System.out.println(sb.toString());
 			statement.execute(sb.toString());
-		} catch (SQLException e ) {
-			System.out.println(e.getMessage());
+			return null;
+		} catch (SQLException sqlException) {
+			System.out.println(sqlException.getMessage());
+			return sqlException;
 		}
 	}
 	
-	public void saveDB () {
-		try {
-			Statement statement = connection.createStatement();
-			
+	public SQLException saveDB () {
+		try (Statement statement = connection.createStatement()) {
 			for (OutcomeIncome oi : outcomeIncomesList) {
 				StringBuilder sb = new StringBuilder();
 				sb.append("INSERT INTO ");
@@ -228,17 +234,17 @@ public class OutcomeIncomeData {
 //				System.out.println(sb.toString());
 				statement.execute(sb.toString());
 			}
+			return null;
 			
-		} catch (SQLException e) {
-			System.out.println(e.getMessage());
+		} catch (SQLException sqlException) {
+			System.out.println(sqlException.getMessage());
+			return sqlException;
 		}
 	}
 	
-	public void createDB () {
-		try 
-			{
+	public SQLException createDB () {
+		try (Statement statement = connection.createStatement()) {
 			connection.setAutoCommit(false);
-			Statement statement = connection.createStatement();
 			StringBuilder sb = new StringBuilder();
 			sb.append("CREATE TABLE IF NOT EXISTS ");
 			sb.append(TABLE);
@@ -257,9 +263,20 @@ public class OutcomeIncomeData {
 			sb.append(" TEXT)");
 //			System.out.println(sb.toString());
 			statement.execute(sb.toString());
-		} catch (SQLException e) {
-			System.out.println(e.getMessage());
+			return null;
+		} catch (SQLException sqlException) {
+			System.out.println(sqlException.getMessage());
+			return sqlException;
 		}
 	}
 	
+	public SQLException commitChanges() {
+		try {
+			connection.commit();
+			return null;
+		} catch (SQLException sqlException) {
+			System.out.println(sqlException.getMessage());
+			return sqlException;
+		}
+	}
 }

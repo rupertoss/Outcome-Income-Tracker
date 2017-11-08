@@ -77,14 +77,23 @@ public class Controller {
 	private Label averageIncomeLabel;
 
 	public void initialize() {
-		//create singleton, loading and sorting data, loading statistics
+		
+		// >> creating singleton
+		// >> opening connection to database
+		// >> loading data from database
+		// >> setting items to TableView
+		// >> sorting
+		// >> updating statistics
+		
 		data = OutcomeIncomeData.getInstance();
 		
-		if (!data.open(data.CONNECTION)) {
-			//implementation of an alert.error and exiting application
+		SQLException sqlException = data.openConnection(data.CONNECTION);
+		if (sqlException != null) {
+			showErrorAlert(sqlException, "Couldn't connect to the database. File may not exist or may be corrupted.\nThe application will terminate.\n\n\n");
+			Platform.exit();
 		}
 		
-		data.loadDB();
+		loadDB();
 		outcomeIncomesTable.setItems(data.getOutcomeIncomes());
 		tableColumnDate.setSortType(TableColumn.SortType.ASCENDING);
 		outcomeIncomesTable.getSortOrder().add(tableColumnDate);
@@ -111,6 +120,7 @@ public class Controller {
 	// Showing dialog to add new Outcome/Income
 	@FXML
 	public void showAddingDialog() {
+		//showing dialog
 		Dialog<ButtonType> dialog = new Dialog<ButtonType>();
 		dialog.initOwner(mainPanel.getScene().getWindow());
 		dialog.setTitle("Add new Outcome/Income");
@@ -118,14 +128,15 @@ public class Controller {
 		fxmlLoader.setLocation(getClass().getResource("OutcomeIncomeDialog.fxml"));
 		try {
 			dialog.getDialogPane().setContent(fxmlLoader.load());
-		} catch (IOException ioe) {
-			showIOExceptionAlert(ioe);
+		} catch (IOException ioException) {
+			showErrorAlert(ioException, "Loader file may not exist or you don't have permission to access it.");
 			return;
 		}
 
 		dialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
 		dialog.getDialogPane().getButtonTypes().add(ButtonType.CANCEL);
 
+		// adding new entry
 		try {
 			Optional<ButtonType> result = dialog.showAndWait();
 			if (result.isPresent() && result.get() == ButtonType.OK) {
@@ -137,7 +148,7 @@ public class Controller {
 				displayStatistics();
 			}
 		} catch (IllegalArgumentException iae) {
-			showWrongInputAlert(iae);
+			showErrorAlert(iae, "Wrong Input Data!\n\nPlease fill correctly all the fields\n\nTotal Value field is required - decimal pointer is comma (.)\nSource field is required\nNotes field is not required");
 			return;
 		}
 	}
@@ -155,6 +166,7 @@ public class Controller {
 			return;
 		}
 
+		// showing editing dialog
 		Dialog<ButtonType> dialog = new Dialog<>();
 		dialog.initOwner(mainPanel.getScene().getWindow());
 		dialog.setTitle("Edit Outcome/Income");
@@ -162,9 +174,8 @@ public class Controller {
 		fxmlLoader.setLocation(getClass().getResource("OutcomeIncomeDialog.fxml"));
 		try {
 			dialog.getDialogPane().setContent(fxmlLoader.load());
-		} catch (IOException e) {
-			System.out.println("Couldn't load the dialog");
-			e.printStackTrace();
+		} catch (IOException ioeException) {
+			showErrorAlert(ioeException, "Couldn't load the editing dialog");
 		}
 
 		dialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
@@ -173,54 +184,47 @@ public class Controller {
 		OutcomeIncomeController outcomeIncomeController = fxmlLoader.getController();
 		outcomeIncomeController.editOutcomeIncome(selectedOutcomeIncome);
 
+		// updating an entry
 		try {
 			Optional<ButtonType> result = dialog.showAndWait();
 			if (result.isPresent() && result.get() == ButtonType.OK) {
 				outcomeIncomeController.updateOutcomeIncome(selectedOutcomeIncome);
-				data.updateDB(selectedOutcomeIncome);
+				updateEntryDB(selectedOutcomeIncome);
+				outcomeIncomesTable.refresh();
 				handleLast30daysButton();
 				outcomeIncomesTable.getSortOrder().add(tableColumnDate);
 				displayStatistics();
 			}
 		} catch (IllegalArgumentException iae) {
-			showWrongInputAlert(iae);
+			showErrorAlert(iae, "Wrong Input Data!\n\nPlease fill correctly all the fields\n\nTotal Value field is required - decimal pointer is comma (.)\nSource field is required\nNotes field is not required");
 			return;
 		}
 	}
 
 	@FXML
 	public void handleExit() {
+		
+		// showing confirmation alert
 		Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
 		alert.getButtonTypes().clear();
 		alert.getButtonTypes().addAll(ButtonType.YES, ButtonType.NO, ButtonType.CANCEL);
 		alert.setTitle("Quitting...");
 		alert.setHeaderText("Do you want to save data before quitting?");
 		Optional<ButtonType> result = alert.showAndWait();
+		
+		// cancel selected by user
+		// >> returning
 		if (result.get() == ButtonType.CANCEL)
 			return;
 		else {
-			if (result.get() == ButtonType.YES)
-				saveData();
+			// committing changes
+			if (result.get() == ButtonType.YES) {
+				commitChangesToDB();
+			}
 		}
-		data.close();
+		// closing connection and exiting
+		closeConnectionToDB();
 		Platform.exit();
-	}
-
-	public void showWrongInputAlert(IllegalArgumentException e) {
-		Alert alert = new Alert(Alert.AlertType.ERROR);
-		alert.setHeaderText("Wrong Input Data");
-		alert.setContentText(
-				"Please fill correctly all the fields\n\nTotal Value field is required - decimal pointer is comma (.)\nSource field is required\nNotes field is not required"
-						+ "\n\n\n" + e.getClass().getSimpleName() + "\n" + e.getMessage());
-		alert.showAndWait();
-	}
-
-	public static void showIOExceptionAlert(IOException ioe) {
-		Alert alert = new Alert(Alert.AlertType.ERROR);
-		alert.setHeaderText("Couldn't reach a file.");
-		alert.setContentText("File may not exist or you don't have permission to access it\n\n\n"
-				+ ioe.getClass().getSimpleName() + "\n" + ioe.getMessage());
-		alert.showAndWait();
 	}
 
 	// Deleting an OutcomeIncome
@@ -244,8 +248,9 @@ public class Controller {
 				+ "\nPress OK to confirm, or cancel to back out");
 		Optional<ButtonType> result = alert.showAndWait();
 
+		// deleting an entry
 		if (result.isPresent() && result.get() == ButtonType.OK) {
-			data.deleteOutcomeIncome(selectedOutcomeIncome);
+			deleteEntryDB(selectedOutcomeIncome);
 			handleLast30daysButton();
 			displayStatistics();
 		}
@@ -256,7 +261,6 @@ public class Controller {
 	public void handleKeyPressed(KeyEvent key) {
 		if (key.getCode().equals(KeyCode.DELETE))
 			deleteOutcomeIncome();
-
 	}
 
 	// Button handler of last 30days entries
@@ -278,17 +282,163 @@ public class Controller {
 		outcomeIncomesTable.getSortOrder().add(tableColumnDate);
 	}
 
+	//showing fileChooser to open and add/replace
 	@FXML
-	public void saveData() {
-		try {
-			data.connection.commit();
-		} catch (SQLException e) {
-			//need proper saving error implementation (alert.error)
-			System.out.println(e.getMessage());
+	public void openNewData() {
+		
+		// creating FileChooser
+		FileChooser fc = new FileChooser();
+		fc.setTitle("Open a new data file");
+		fc.setInitialDirectory(new File(System.getProperty("user.dir")));
+		fc.getExtensionFilters().addAll(new ExtensionFilter("Databases", "*.db"),
+				new ExtensionFilter("All files", "*.*"));
+		File file = fc.showOpenDialog(mainPanel.getScene().getWindow());
+		
+		// if file was selected show dialog to choose to add/replace data
+		if (file != null) {
+			Alert alert = new Alert(Alert.AlertType.WARNING);
+			ButtonType add = new ButtonType("Add");
+			ButtonType replace = new ButtonType("Replace");
+			alert.setHeaderText("Add or Replace?");
+			alert.setContentText("Do you want to Add new data to existing one or Replace it with selected file data?");
+			alert.getDialogPane().getButtonTypes().setAll(add, replace, ButtonType.CANCEL);
+			
+			// cancel selected by user
+			// >> returning
+			
+			Optional<ButtonType> result = alert.showAndWait();
+			if (result.get() == ButtonType.CANCEL)
+				return;
+			else {
+				if (result.get() == replace) {
+					
+					// replace old database by selected new one
+					// >> closing old connection
+					// >> clearing TableView
+					// >> opening new connection
+					// >> loading new data 
+					
+					closeConnectionToDB();
+					data.getOutcomeIncomes().clear();
+					openConnectionToDB("jdbc:sqlite:" + file.getPath());
+					loadDB();
+					
+				} else {
+					
+					// adding new data from selected database by adding to existing one
+					// >> closing old connection
+					// >> opening new connection
+					// >> loading new data
+					// >> closing new connection
+					// >> opening old connection
+					
+					String oldConnection = data.connection.toString();
+					closeConnectionToDB();
+					openConnectionToDB("jdbc:sqlite:" + file.getPath());
+					loadDB();
+					closeConnectionToDB();
+					openConnectionToDB(oldConnection);
+				}
+				
+				handleLast30daysButton();
+				outcomeIncomesTable.getSortOrder().add(tableColumnDate);
+				displayStatistics();
+			}
 		}
 	}
 
-	public void displayStatistics() {
+	@FXML
+	public void saveAsData() {
+		FileChooser fc = new FileChooser();
+		fc.setTitle("Save data as...");
+		fc.setInitialDirectory(new File(System.getProperty("user.dir")));
+		fc.getExtensionFilters().add(new ExtensionFilter("Databases", "*.db"));
+		File file = fc.showSaveDialog(mainPanel.getScene().getWindow());
+		
+		// user chose file to the current database 
+		// >> saving by committing changes
+		
+		if (file.getPath() == data.DB_NAME) {
+			commitChangesToDB();
+		}
+		
+		// user chose new file 
+		// >> closing existing connection 
+		// >> opening new connection 
+		// >> creating database
+		// >> saving data to the database 
+		// >> committing changes
+		
+		closeConnectionToDB();
+		openConnectionToDB("jdbc:sqlite:" + file.getPath());
+		createDB();
+		saveDB();
+		commitChangesToDB();
+	}
+
+	private static void showErrorAlert(Exception e, String contextText) {
+		Alert alert = new Alert(Alert.AlertType.ERROR);
+		alert.setHeaderText("Critical Error!");
+		StringBuilder sb = new StringBuilder();
+		sb.append(contextText);
+		sb.append("\n\n\n");
+		sb.append(e.getClass().getSimpleName());
+		sb.append("\n");
+		sb.append(e.getMessage());
+		alert.setContentText(sb.toString());
+		alert.showAndWait();
+	}
+	
+	private void openConnectionToDB(String connection) {
+		SQLException sqlException = data.openConnection(connection);
+		if (sqlException != null) 
+			showErrorAlert(sqlException, "Couldn't connect to the database. File may not exist or may be corrupted.");
+	}
+	
+	private void closeConnectionToDB() {
+		SQLException sqlException = data.closeConnection();
+		if (sqlException != null) 
+			showErrorAlert(sqlException, "Database error. Couldn't close connection.");
+	}
+	
+	private void loadDB() {
+		SQLException sqlException = data.loadDB();
+		if (sqlException != null) 
+			showErrorAlert(sqlException, "Couldn't load the database. File may not exist or may be corrupted.");
+	}
+	
+	private void createDB() {
+		SQLException sqlException = data.createDB();
+		if (sqlException != null)
+			showErrorAlert(sqlException, "Couldn't create new database.");
+	}
+	
+	private void saveDB() {
+		SQLException sqlException = data.saveDB();
+		if (sqlException != null)
+			showErrorAlert(sqlException, "Couldn't save data to the database.");
+	}
+	
+	private void commitChangesToDB() {
+		SQLException sqlException = data.commitChanges();
+		if (sqlException != null)
+			showErrorAlert(sqlException, "Couldn't commit changes to the database.");
+	}
+	
+	private void deleteEntryDB(OutcomeIncome selectedOutcomeIncome) {
+		SQLException sqlException = data.deleteOutcomeIncome(selectedOutcomeIncome);
+		if (sqlException != null)
+			showErrorAlert(sqlException, "Couldn't delete selected entry.");
+	}
+	
+	private void updateEntryDB(OutcomeIncome selectedOutcomeIncome) {
+		SQLException sqlException = data.updateEntryInDB(selectedOutcomeIncome);
+		if (sqlException != null) 
+			showErrorAlert(sqlException, "Couldn't update an entry.");
+	}
+
+	
+	private void displayStatistics() {
 		double totalMoney = 0;
 		double outcomeMoney = 0;
 		double incomeMoney = 0;
@@ -324,74 +474,6 @@ public class Controller {
 		nrOfIncomesLabel.setText("" + nrOfIncomes);
 		averageOutcomeLabel.setText(String.format("%.2f", averageOutcome));
 		averageIncomeLabel.setText(String.format("%.2f", averageIncome));
-	}
-	
-	//showing fileChooser to open and add/replace
-	public void openNewData() {
-		
-		//creating FileChooser
-		FileChooser fc = new FileChooser();
-		fc.setTitle("Open a new data file");
-		fc.setInitialDirectory(new File(System.getProperty("user.dir")));
-		fc.getExtensionFilters().addAll(new ExtensionFilter("Databases", "*.db"),
-				new ExtensionFilter("All files", "*.*"));
-		File file = fc.showOpenDialog(mainPanel.getScene().getWindow());
-		
-		//if file was selected show dialog to choose to add/replace data
-		if (file != null) {
-			Alert alert = new Alert(Alert.AlertType.WARNING);
-			ButtonType add = new ButtonType("Add");
-			ButtonType replace = new ButtonType("Replace");
-			alert.setHeaderText("Add or Replace?");
-			alert.setContentText("Do you want to Add new data to existing one or Replace it with selected file data?");
-			alert.getDialogPane().getButtonTypes().setAll(add, replace, ButtonType.CANCEL);
-			
-			Optional<ButtonType> result = alert.showAndWait();
-			if (result.get() == ButtonType.CANCEL)
-				return;
-			else {
-				if (result.get() == replace) {
-					data.close();
-					if (!data.open("jdbc:sqlite:" + file.getPath())) {
-						//implementation of an alert.error and exiting application
-					}
-					data.getOutcomeIncomes().clear();
-					data.loadDB();
-				} else {
-					String oldConnection = data.connection.toString();
-					data.close();
-					if (!data.open("jdbc:sqlite:" + file.getPath())) {
-						//implementation of an alert.error and exiting application
-					}
-					data.loadDB();
-					data.close();
-					if (!data.open(oldConnection)) {
-						//implementation of an alert.error and exiting application
-					}
-				}
-				handleLast30daysButton();
-				outcomeIncomesTable.getSortOrder().add(tableColumnDate);
-				displayStatistics();
-			}
-		}
-	}
-
-	@FXML
-	public void saveAsData() {
-		FileChooser fc = new FileChooser();
-		fc.setTitle("Save data as...");
-		fc.setInitialDirectory(new File(System.getProperty("user.dir")));
-		fc.getExtensionFilters().add(new ExtensionFilter("Databases", "*.db"));
-		File file = fc.showSaveDialog(mainPanel.getScene().getWindow());
-		if (file.getPath() == data.DB_NAME) 
-			saveData();
-		data.close();
-		if (!data.open("jdbc:sqlite:" + file.getPath())) {
-			//implementation of an alert.error and exiting application
-		}
-		data.createDB();
-		data.saveDB();
-		saveData();
 	}
 
 }
