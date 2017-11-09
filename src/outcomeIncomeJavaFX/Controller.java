@@ -90,6 +90,7 @@ public class Controller {
 		SQLException sqlException = data.openConnection(data.CONNECTION);
 		if (sqlException != null) {
 			showErrorAlert(sqlException, "Couldn't connect to the database. File may not exist or may be corrupted.\nThe application will terminate.\n\n\n");
+			data.logWriter(sqlException);
 			Platform.exit();
 		}
 		
@@ -130,6 +131,7 @@ public class Controller {
 			dialog.getDialogPane().setContent(fxmlLoader.load());
 		} catch (IOException ioException) {
 			showErrorAlert(ioException, "Loader file may not exist or you don't have permission to access it.");
+			data.logWriter(ioException);
 			return;
 		}
 
@@ -147,8 +149,9 @@ public class Controller {
 				outcomeIncomesTable.getSortOrder().add(tableColumnDate);
 				displayStatistics();
 			}
-		} catch (IllegalArgumentException iae) {
-			showErrorAlert(iae, "Wrong Input Data!\n\nPlease fill correctly all the fields\n\nTotal Value field is required - decimal pointer is comma (.)\nSource field is required\nNotes field is not required");
+		} catch (IllegalArgumentException iaException) {
+			showErrorAlert(iaException, "Wrong Input Data!\n\nPlease fill correctly all the fields\n\nTotal Value field is required - decimal pointer is comma (.)\nSource field is required\nNotes field is not required");
+			data.logWriter(iaException);
 			return;
 		}
 	}
@@ -174,8 +177,9 @@ public class Controller {
 		fxmlLoader.setLocation(getClass().getResource("OutcomeIncomeDialog.fxml"));
 		try {
 			dialog.getDialogPane().setContent(fxmlLoader.load());
-		} catch (IOException ioeException) {
-			showErrorAlert(ioeException, "Couldn't load the editing dialog");
+		} catch (IOException ioException) {
+			showErrorAlert(ioException, "Couldn't load the editing dialog");
+			data.logWriter(ioException);
 		}
 
 		dialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
@@ -195,8 +199,9 @@ public class Controller {
 				outcomeIncomesTable.getSortOrder().add(tableColumnDate);
 				displayStatistics();
 			}
-		} catch (IllegalArgumentException iae) {
-			showErrorAlert(iae, "Wrong Input Data!\n\nPlease fill correctly all the fields\n\nTotal Value field is required - decimal pointer is comma (.)\nSource field is required\nNotes field is not required");
+		} catch (IllegalArgumentException iaException) {
+			showErrorAlert(iaException, "Wrong Input Data!\n\nPlease fill correctly all the fields\n\nTotal Value field is required - decimal pointer is comma (.)\nSource field is required\nNotes field is not required");
+			data.logWriter(iaException);
 			return;
 		}
 	}

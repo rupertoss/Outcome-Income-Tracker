@@ -31,6 +31,7 @@ Introduction data stored in database (using sqlite)
 - 1.17d	restored program functionality (CRUD operations)
 - 1.18d	restored all functions || old code cleaned, files removed
 - 1.19d	try with resources || exception handling
+- 1.20d	saving errors details to log file
 		
 	
 

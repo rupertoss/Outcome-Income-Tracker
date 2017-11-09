@@ -1,5 +1,8 @@
 package outcomeIncomeData;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -93,11 +96,10 @@ public class OutcomeIncomeData {
 			} else {
 				throw new SQLException("Couldn't properly insert an entry!");
 			}
-//			System.out.println(lastAdded.getInt(INDEX_ID));
 			outcomeIncomesList.add(oi);
 			return null;
 		} catch (SQLException sqlException) {
-			System.out.println(sqlException.getMessage());
+			logWriter(sqlException);
 			return sqlException;
 		}
 	}
@@ -116,7 +118,7 @@ public class OutcomeIncomeData {
 			statement.execute(sb.toString());
 			return null;
 		} catch (SQLException sqlException) {
-			System.out.println(sqlException.getMessage());
+			logWriter(sqlException);
 			return sqlException;
 		}
 	}
@@ -127,9 +129,9 @@ public class OutcomeIncomeData {
 			connection = DriverManager.getConnection(connectionString);
 			connection.setAutoCommit(false);
 			return null;
-		} catch (SQLException e) {
-			System.out.println(e.getMessage());
-			return e;
+		} catch (SQLException sqlException) {
+			logWriter(sqlException);
+			return sqlException;
 		}
 	}
 	
@@ -139,7 +141,7 @@ public class OutcomeIncomeData {
 			connection.close();
 			return null;
 		} catch (SQLException sqlException ) {
-			System.out.println(sqlException.getMessage());
+			logWriter(sqlException);
 			return sqlException;
 		}
 	}
@@ -155,13 +157,12 @@ public class OutcomeIncomeData {
 				double totalValue = results.getDouble(INDEX_VALUE);
 				String source = results.getString(INDEX_SOURCE);
 				String notes = results.getString(INDEX_NOTES);
-//				System.out.println(new OutcomeIncome (id, date, incomeFlag, totalValue, source, notes));
 				outcomeIncomesList.add(new OutcomeIncome (id, date, incomeFlag, totalValue, source, notes));
 			}
 			return null;
-		} catch (SQLException sqleException) {
-			System.out.println(sqleException.getMessage());
-			return sqleException;
+		} catch (SQLException sqlException) {
+			logWriter(sqlException);
+			return sqlException;
 		}
 	}
 	
@@ -195,11 +196,10 @@ public class OutcomeIncomeData {
 			sb.append(" = '");
 			sb.append(oi.getId());
 			sb.append("'");
-//			System.out.println(sb.toString());
 			statement.execute(sb.toString());
 			return null;
 		} catch (SQLException sqlException) {
-			System.out.println(sqlException.getMessage());
+			logWriter(sqlException);
 			return sqlException;
 		}
 	}
@@ -231,13 +231,12 @@ public class OutcomeIncomeData {
 				sb.append("', '");
 				sb.append(oi.getNotes());
 				sb.append("')");
-//				System.out.println(sb.toString());
 				statement.execute(sb.toString());
 			}
 			return null;
 			
 		} catch (SQLException sqlException) {
-			System.out.println(sqlException.getMessage());
+			logWriter(sqlException);
 			return sqlException;
 		}
 	}
@@ -261,11 +260,10 @@ public class OutcomeIncomeData {
 			sb.append(" TEXT NOT NULL, ");
 			sb.append(COLUMN_NOTES);
 			sb.append(" TEXT)");
-//			System.out.println(sb.toString());
 			statement.execute(sb.toString());
 			return null;
 		} catch (SQLException sqlException) {
-			System.out.println(sqlException.getMessage());
+			logWriter(sqlException);
 			return sqlException;
 		}
 	}
@@ -275,8 +273,25 @@ public class OutcomeIncomeData {
 			connection.commit();
 			return null;
 		} catch (SQLException sqlException) {
-			System.out.println(sqlException.getMessage());
+			logWriter(sqlException);
 			return sqlException;
 		}
+	}
+	
+	public void logWriter (Exception e) {
+		try (BufferedWriter bw = new BufferedWriter(new FileWriter("log.txt", true))) {
+			StringBuilder sb = new StringBuilder();
+			sb.append("\n\n\n");
+			sb.append(LocalDate.now().toString());
+			sb.append("\n");
+			sb.append(e.getClass().getName());
+			sb.append("\n");
+			sb.append(e.getMessage());
+			sb.append("\n");
+			bw.write(sb.toString());
+		} catch (IOException ioException) {
+			ioException.printStackTrace();
+		}
+		
 	}
 }
